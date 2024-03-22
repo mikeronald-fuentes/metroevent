@@ -1,0 +1,5 @@
+To connect to database server here are the list of instructions:
+1. Clone repository
+2. cd to backend
+3. re-install express mysql cors nodemon to be sure (run npm install express mysql cors nodemon)
+Lastly, add your endpoints and get the data in json form refer to the uploaded file for reference.
