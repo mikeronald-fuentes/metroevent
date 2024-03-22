@@ -1,0 +1,80 @@
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.white {
+  flex: 1;
+  background-color: #ffffff;
+  width: 50%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.blue {
+  flex: 1;
+  background-color: #86a7fc;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.logo {
+  width: 40%;
+  height: 40%;
+  position: absolute;
+  top: 20%;
+}
+
+.tag {
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  position: absolute;
+  top: 65%;
+  right: 50%;
+  transform: translate(50%, 10%);
+}
+
+.tag2 {
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  position: absolute;
+  top: 73%;
+  bottom: 20%;
+  right: 50%;
+  transform: translate(50%, 10%);
+}
+
+.tag3 {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+}
+
+.subtag3 {
+  position: absolute;
+  top: 10%;
+  right: 5%;
+}
+
+
+.tag4,
+.usernametag,
+.input1,
+.passtag,
+.input2 {
+  font-family: 'Roboto', sans-serif;
+  width: 350px;
+  margin-bottom: 10px;
+}
+
+.loginbutton {
+  font-family: 'Roboto', sans-serif;
+  width: 350px;
+  height: 40px;
+}

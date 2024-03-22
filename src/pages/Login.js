@@ -1,72 +1,34 @@
 import React from "react";
 import logo from '../images/logo.png';
-import { FONT_MONTSERATT, FONT_ROBOTO } from "../Fonts/Fonts.tsx";
-
-const styles = {
-    container: {
-      display: 'flex',
-      height: '100vh'
-    },
-    white: {
-      flex: 1,
-      backgroundColor: '#fff'
-    },
-    blue: {
-      flex: 1,
-      backgroundColor: '#86a7fc',
-      width: '50%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      position: 'relative'
-    },
-    logo: {
-      width: '50%',
-      height: '50%',
-      position: 'absolute',
-      top: '35%',
-      right: '50%',
-      bottom: '50%',
-      transform: 'translate(50%, -40%)'
-    },
-    tag: {
-      color: '#fff',
-      fontFamily: FONT_MONTSERATT,
-      position: 'absolute',
-      top: '65%',
-      right: '50%',
-      transform: 'translate(50%, 10%)'
-    },
-    tag2: {
-        color: '#ffffff',
-        fontFamily: FONT_MONTSERATT,
-        position: 'absolute',
-        top: '73%',
-        bottom: '20%',
-        right: '50%',
-        transform: 'translate(50%, 10%)',
-    }
-  };
-
+import { Typography, TextField, Button } from "@mui/material";
+import "./LoginStyles.css";
 
 function Login(){
-    
-    return(
-        <>
-            <div style={styles.container}>
-                <div style={styles.blue} className="blue">
-                    <img src={logo} alt="Logo" style={styles.logo} className="logo" />
-                    <h1 className="tag" style={styles.tag}>Log in to your account.</h1>
-                    <p className="tag2" style={styles.tag2}>Enter your credentials to access your account.</p>
-                </div>
 
-                <div style={styles.white} className="white">
-                
-                </div>
-            </div>
-        </>
-       
-    );
+  const handleOnClick = () => {
+
+  }
+
+  return (
+    <div className="container">
+      <div className="blue">
+        <img src={logo} alt="Logo" className="logo" />
+        <Typography variant="h4" className="tag">Log in to your account</Typography>
+        <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
+      </div>
+      <div className="white">
+        <Typography variant="h4" className="tag3">Log in</Typography>
+        <Typography variant="body1" className="subtag3">Secure access</Typography>
+        <Typography variant="h4" className="tag4">Log in</Typography>
+        <Typography variant="body1" className="usernametag">Username</Typography>
+        <TextField variant="outlined" placeholder="Enter your username" className="input1" />
+        <Typography variant="body1" className="passtag">Password</Typography>
+        <TextField variant="outlined" placeholder="Enter your password" className="input2" type="password"/>
+        <br />
+        <Button variant="contained" className="loginbutton"><Typography>Log in</Typography></Button>
+      </div>
+    </div>
+  );
 }
 
 export default Login;
