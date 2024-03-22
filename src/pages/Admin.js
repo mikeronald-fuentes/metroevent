@@ -11,9 +11,18 @@ export default function Admin() {
             .catch(err => console.error(err));
     }, []);
 
-    const handleApprove = (id) => {
-        console.log(`Approve button clicked for id: ${id}`);
-    };
+    const handleApprove = (username) => {
+        console.log(`Approve button clicked for username: ${username}`);
+        fetch(`http://localhost:3000/approve/${username}`, {
+            method: 'PUT'
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            // Optionally, update the state or perform other actions
+        })
+        .catch(err => console.error(err));
+    };    
 
     const handleDecline = (id) => {
         console.log(`Decline button clicked for id: ${id}`);

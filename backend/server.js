@@ -36,6 +36,24 @@ app.get('/admin', (req, res) => {
     });
 });
 
+app.put('/approve/:username', (req, res) => {
+    const { username } = req.params;
+    const sql = `
+        UPDATE users, admin 
+        SET users.user_type = 1, admin.is_approved = 1
+        WHERE username = ?`;
+
+    db.query(sql, [username], (err, result) => {
+        if (err) {
+            console.error('Error updating record: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        console.log('Record updated successfully');
+        res.json({ message: 'Record updated successfully' });
+    });
+});
+
 app.get('/event_type', (req, res) => {
     const sql = "SELECT * FROM event_type";
     db.query(sql, (err, data) => {
