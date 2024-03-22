@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 22, 2024 at 05:44 PM
+-- Generation Time: Mar 22, 2024 at 06:10 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -40,10 +40,8 @@ CREATE TABLE `admin_list` (
 
 INSERT INTO `admin_list` (`request_id`, `username`, `request_type`, `is_approved`) VALUES
 (1, 'Winds', 0, 1),
-(2, 'Dominic', 0, 0),
 (3, 'Hark', 0, 0),
-(4, 'Herald', 0, 0),
-(5, 'Micro', 0, 0);
+(4, 'Herald', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -121,6 +119,20 @@ CREATE TABLE `notification_category` (
   `notification_id` int(11) NOT NULL,
   `notification_type` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notification_category`
+--
+
+INSERT INTO `notification_category` (`notification_id`, `notification_type`) VALUES
+(0, 'Request to be an administrator declined'),
+(1, 'Request to be an administrator confirmed'),
+(2, 'Request to be an organizer declined'),
+(3, 'Request to be an organizer confirmed'),
+(4, 'Request to join event declined'),
+(5, 'Request to join event confirmed'),
+(6, 'Cancelled event'),
+(7, 'Upcoming event');
 
 -- --------------------------------------------------------
 
@@ -306,12 +318,6 @@ ALTER TABLE `event_user_request`
 --
 ALTER TABLE `event_user_review`
   MODIFY `event_review_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `notification_category`
---
-ALTER TABLE `notification_category`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
