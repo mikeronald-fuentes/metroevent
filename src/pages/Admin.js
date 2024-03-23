@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import HeaderComponent from "./HeaderComponent";
-import { useAuth } from '../Hooks/Authorization'; // Import useAuth hook for session management
+import { useAuth } from '../Hooks/Authorization';
 import { useNavigate } from "react-router-dom";
 
 function Admin() {
-    const { user } = useAuth(); // Get user from useAuth hook
+    const { user } = useAuth();
 
     const [organizerRequests, setOrganizerRequests] = useState([]);
     const [administratorRequests, setAdministratorRequests] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if user is authenticated
         if (!user) {
-            navigate('/login'); // Redirect to login if user is not authenticated
+            navigate('/login');
             return;
         }
 
@@ -26,7 +25,7 @@ function Admin() {
                 setAdministratorRequests(adminRequest);
             })
             .catch(err => console.error(err));
-    }, [user, navigate]); // Include navigate in the dependency array
+    }, [user, navigate]);
 
     const handleApprove = (username, requestType) => {
         console.log(`Approve button clicked for username: ${username}`);
@@ -39,8 +38,6 @@ function Admin() {
         })
         .then(res => res.json())
         .then(data => {
-            console.log(data);
-            // Use functional form of setState to update state based on previous state
             setOrganizerRequests(prevOrganizerRequests => prevOrganizerRequests.filter(item => item.username !== username));
             setAdministratorRequests(prevAdministratorRequests => prevAdministratorRequests.filter(item => item.username !== username));
         })
@@ -59,7 +56,6 @@ function Admin() {
         .then(res => res.json())
         .then(data => {
             console.log(data);
-            // Use functional form of setState to update state based on previous state
             setOrganizerRequests(prevOrganizerRequests => prevOrganizerRequests.filter(item => item.username !== username));
             setAdministratorRequests(prevAdministratorRequests => prevAdministratorRequests.filter(item => item.username !== username));
         })

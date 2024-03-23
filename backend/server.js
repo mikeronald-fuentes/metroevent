@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 const corsOptions = {
     origin: 'http://localhost:3001',
-    credentials: true // Allow credentials (e.g., cookies) to be included in the requests
+    credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -61,7 +61,6 @@ app.get('/admin', (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        // Log the fetched data
         console.log('Fetched data:', data);
         res.json(data);
     });
@@ -136,6 +135,39 @@ app.post('/approve', (req, res) => {
                     res.json({ message: 'Records updated successfully' });
                 });
             });
+        });
+    });
+});
+
+app.post('/decline', (req, res) => {
+    const { username } = req.body;
+    let message = "Request to become an organizer/administrator is declined";
+
+    const adminSql = `
+        DELETE FROM admin_list
+        WHERE username = ?`;
+
+    const notifSql = `
+        INSERT INTO user_notification
+        (username, notification_category, notification_info)
+        VALUES (?, 2, ?)`;
+
+    db.query(adminSql, [username], (adminErr, adminResult) => {
+        if (adminErr) {
+            console.error('Error deleting admin record: ', adminErr);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        db.query(notifSql, [username, message], (notifErr, notifResult) => {
+            if (notifErr) {
+                console.error('Error inserting notification: ', notifErr);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+
+            console.log('Admin record deleted successfully for username:', username);
+            res.json({ message: 'Admin record deleted successfully' });
         });
     });
 });

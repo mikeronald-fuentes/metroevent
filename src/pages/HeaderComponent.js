@@ -1,15 +1,15 @@
 import React from "react";
 import { Button, Typography } from "@mui/material";
-import { useAuth } from '../Hooks/Authorization'; // Import useAuth hook for session management
+import { useAuth } from '../Hooks/Authorization';
 import { useNavigate } from "react-router-dom";
 
 export default function HeaderComponent() {
-    const { logout } = useAuth(); // Get logout function from useAuth hook
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        logout(); // Call logout function to clear session
-        navigate('/login'); // Redirect to login page after logout
+        logout();
+        navigate('/login');
     };
 
     return (
