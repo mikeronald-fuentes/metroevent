@@ -69,27 +69,31 @@ app.get('/admin', (req, res) => {
 app.post('/approve', (req, res) => {
     const { username } = req.body;
     let message;
+    let category;
+    
     const requestTypeSql = `
-        SELECT request_type FROM admin_list WHERE username = ?`;
+        SELECT request_type 
+        FROM admin_list 
+        WHERE username = ?`;
 
     const userSql = `
-        UPDATE user_info
-        SET user_type = CASE
-            WHEN ? = 0 THEN 1
-            WHEN ? = 1 THEN 2
-            ELSE user_type
-        END
+        UPDATE user_info 
+        SET user_type = 
+            CASE WHEN ? = 0 
+                THEN 1 WHEN ? = 1 
+                THEN 2 ELSE user_type 
+            END 
         WHERE username = ?`;
 
     const adminSql = `
-        UPDATE admin_list
-        SET is_approved = 1
+        UPDATE admin_list 
+        SET is_approved = 1 
         WHERE username = ?`;
 
     const notifSql = `
-        INSERT INTO user_notification
-        (username, notification_category, notification_info)
-        VALUES (?, 2, ?)`;
+        INSERT INTO user_notification 
+        (username, notification_category, notification_info) 
+        VALUES (?, ?, ?)`;
 
     db.query(requestTypeSql, [username], (requestTypeErr, requestTypeResult) => {
         if (requestTypeErr) {
@@ -106,8 +110,17 @@ app.post('/approve', (req, res) => {
 
         const requestType = requestTypeResult[0].request_type;
 
-        // Conditionally choose message based on request type
-        message = requestType === 0 ? "Request to become an organizer is accepted" : "Request to become an administrator is accepted";
+        if (requestType === 0) {
+            message = "Request to become an organizer is accepted";
+            category = 3;
+        } else if (requestType === 1) {
+            message = "Request to become an administrator is accepted";
+            category = 1;
+        } else {
+            console.error('Invalid request type for user: ', username);
+            res.status(400).json({ error: 'Invalid request type' });
+            return;
+        }
 
         db.query(userSql, [requestType, requestType, username], (userErr, userResult) => {
             if (userErr) {
@@ -123,8 +136,7 @@ app.post('/approve', (req, res) => {
                     return;
                 }
 
-                // Insert notification into user_notification table
-                db.query(notifSql, [username, message], (notifErr, notifResult) => {
+                db.query(notifSql, [username, category, message], (notifErr, notifResult) => {
                     if (notifErr) {
                         console.error('Error inserting notification: ', notifErr);
                         res.status(500).json({ error: 'Internal Server Error' });
@@ -141,35 +153,75 @@ app.post('/approve', (req, res) => {
 
 app.post('/decline', (req, res) => {
     const { username } = req.body;
-    let message = "Request to become an organizer/administrator is declined";
+    let message;
+    let category;
 
     const adminSql = `
-        DELETE FROM admin_list
+        DELETE FROM admin_list 
+        WHERE username = ?`;
+    
+    const notifSql = `
+        INSERT INTO user_notification 
+        (username, notification_category, notification_info) 
+        VALUES (?, ?, ?)`;
+
+    const requestTypeSql = `
+        SELECT request_type 
+        FROM admin_list 
         WHERE username = ?`;
 
-    const notifSql = `
-        INSERT INTO user_notification
-        (username, notification_category, notification_info)
-        VALUES (?, 2, ?)`;
-
-    db.query(adminSql, [username], (adminErr, adminResult) => {
-        if (adminErr) {
-            console.error('Error deleting admin record: ', adminErr);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
-        }
-
-        db.query(notifSql, [username, message], (notifErr, notifResult) => {
-            if (notifErr) {
-                console.error('Error inserting notification: ', notifErr);
+    if (username) {
+        db.query(requestTypeSql, [username], (requestTypeErr, requestTypeResult) => {
+            if (requestTypeErr) {
+                console.error('Error fetching request type: ', requestTypeErr);
                 res.status(500).json({ error: 'Internal Server Error' });
                 return;
             }
 
-            console.log('Admin record deleted successfully for username:', username);
-            res.json({ message: 'Admin record deleted successfully' });
+            if (requestTypeResult.length === 0) {
+                console.error('Invalid username provided');
+                res.status(400).json({ error: 'Invalid username' });
+                return;
+            }
+
+            const requestType = requestTypeResult[0].request_type;
+
+            if (requestType === 0) {
+                message = "Request to become an organizer is declined";
+                category = 2;
+            } else if (requestType === 1) {
+                message = "Request to become an administrator is declined";
+                category = 0;
+            } else {
+                console.error('Invalid request type for user: ', username);
+                res.status(400).json({ error: 'Invalid request type' });
+                return;
+            }
+
+            db.query(adminSql, [username], (adminErr, adminResult) => {
+                if (adminErr) {
+                    console.error('Error deleting admin record: ', adminErr);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+
+                db.query(notifSql, [username, category, message], (notifErr, notifResult) => {
+                    if (notifErr) {
+                        console.error('Error inserting notification: ', notifErr);
+                        res.status(500).json({ error: 'Internal Server Error' });
+                        return;
+                    }
+
+                    console.log('Admin record deleted successfully for username:', username);
+                    res.json({ message: 'Admin record deleted successfully' });
+                });
+            });
         });
-    });
+    } else {
+        console.error('Invalid username provided');
+        res.status(400).json({ error: 'Invalid username' });
+        return;
+    }
 });
 
 app.get('/users', (req, res) => {
