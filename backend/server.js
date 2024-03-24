@@ -399,16 +399,16 @@ app.post('/checkupvote', (req, res) => {
 
     // Query the event_upvote table to check if the user has upvoted each event
     const sql = `
-        SELECT 
-            ei.event_id,
-            IFNULL(eu.username, '') AS voted_by_user,
-            COUNT(eu.username) AS upvote_count
-        FROM 
-            event_info ei
-        LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id
-        GROUP BY
-            ei.event_id`;
+    SELECT 
+        ei.event_id,
+    IFNULL(eu.username, '') AS voted_by_user,
+    COUNT(eu.username) AS upvote_count
+    FROM 
+        event_info ei
+    LEFT JOIN 
+        event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
+    GROUP BY
+        ei.event_id`;
 
     db.query(sql, [username], (err, data) => {
         if (err) {
