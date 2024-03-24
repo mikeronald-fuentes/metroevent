@@ -20,7 +20,7 @@ function Login() {
           navigate('/home');
         } else if (response.data.user_type === 1) {
           navigate('/organizer');
-        } else if (response.data.user_type === 3) {
+        } else if (response.data.user_type === 2) {
           navigate('/admin');
         }
       } else {

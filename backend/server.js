@@ -29,6 +29,7 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT username, user_type FROM user_info WHERE username = ? AND password = ?';
 
+
     db.query(sql, [username, password], (err, result) => {
         if (err) {
             console.error('Error executing query: ', err);
@@ -40,6 +41,8 @@ app.post('/login', (req, res) => {
             console.log('Login failed');
             res.status(401).json({ success: false, message: 'Invalid username or password' });
         } else {
+            // Set the username in the session
+            req.session.username = username;
             console.log('Login successful');
             res.json({ success: true, message: 'Login successful', user_type: result[0].user_type });
         }
@@ -110,6 +113,138 @@ app.post('/decline', (req, res) => {
     });
 });
 
+app.post('/addevent', (req, res) => {
+    const {
+        organizer,
+        eventType,
+        eventName,
+        description,
+        limit,
+        location,
+        date,
+        time,
+    } = req.body;
+
+    // Check if the organizer exists and is an organizer (user_type = 1)
+    const checkOrganizerSql = 'SELECT * FROM user_info WHERE username = ? AND user_type = 1';
+    db.query(checkOrganizerSql, [organizer], (checkErr, checkResult) => {
+        if (checkErr) {
+            console.error('Error checking organizer:', checkErr);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        if (checkResult.length === 0) {
+            // Organizer doesn't exist or is not an organizer
+            console.error('Organizer does not exist or is not an organizer');
+            res.status(400).json({ error: 'Organizer does not exist or is not an organizer' });
+            return;
+        }
+
+        // Organizer exists and is an organizer, proceed with event insertion
+        const insertEventSql = `
+            INSERT INTO event_info 
+            (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        db.query(insertEventSql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
+            if (err) {
+                console.error('Error adding event:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+
+            console.log('Event added successfully');
+            const eventId = result.insertId;
+            const insertUpvoteSql = `INSERT INTO event_upvote (event_id, event_vote_count) VALUES (?, 0)`;
+            db.query(insertUpvoteSql, [eventId], (upvoteErr, upvoteResult) => {
+                if (upvoteErr) {
+                    console.error('Error adding event upvote:', upvoteErr);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+                console.log('Event upvote added successfully');
+                res.json({ message: 'Event added successfully' });
+            });
+        });
+    });
+});
+
+
+
+app.get('/events/:username', (req, res) => {
+    const { username } = req.params;
+    const sql = 'SELECT * FROM event_info WHERE event_organizer = ?';
+
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        if (data.length === 0) {
+            // If no events found for the organizer, return a 404 error
+            res.status(404).json({ error: 'No events found for the organizer' });
+            return;
+        }
+
+        // Respond with the fetched events data
+        res.json(data);
+    });
+});
+
+//all events not including yours
+app.get('/events', (req, res) => {
+    const { username } = req.query; // Assuming the username is passed as a query parameter
+    const sql = `
+        SELECT event_info.*
+        FROM event_info
+        WHERE event_info.event_id NOT IN (
+            SELECT event_id
+            FROM event_attendees
+            WHERE username = ?
+        )`;
+
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.json(data);
+    });
+});
+
+
+app.get('/events/attended/:username', (req, res) => {
+    const { username } = req.params;
+    const sql = `
+        SELECT event_info.*
+        FROM event_info
+        INNER JOIN event_attendees ON event_info.event_id = event_attendees.event_id
+        WHERE event_attendees.username = ?`;
+
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        if (data.length === 0) {
+            // If no events found for the user, return a 404 error
+            res.status(404).json({ error: 'No events found for the user' });
+            return;
+        }
+
+        // Respond with the fetched events data
+        res.json(data);
+    });
+});
+
+
+
 
 app.get('/users', (req, res) => {
     const sql = "SELECT * FROM user_info";
@@ -127,3 +262,145 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+app.post('/events/join', (req, res) => {
+    const { event_id, username } = req.body;
+    const sql = 'INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, ?)';
+
+    const isAccepted = false;
+
+    db.query(sql, [event_id, username, isAccepted], (err, result) => {
+        if (err) {
+            console.error('Error joining event:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        console.log('Event join request sent successfully');
+        res.json({ message: 'Event join request sent successfully' });
+    });
+});
+
+
+app.get('/events/hasRequested/:eventId', (req, res) => {
+    const { eventId } = req.params;
+    const { username } = req.body;
+    const sql = `
+        SELECT *
+        FROM event_user_request
+        WHERE event_id = ? AND username = ?`;
+
+    // Execute the SQL query
+    db.query(sql, [eventId, username], (err, data) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        // Check if the user has already requested to join the event
+        if (data.length > 0) {
+            // If there's already a request, send a response indicating it
+            res.json({ hasRequested: true });
+        } else {
+            // If there's no request, send a response indicating it
+            res.json({ hasRequested: false });
+        }
+    });
+});
+
+
+
+
+app.post('/events/cancelRegistration', (req, res) => {
+    try {
+        const { event_id, username } = req.body;
+
+        // Delete data from the event_attendees table based on the event ID and username
+        const query = `DELETE FROM event_attendees WHERE event_id = ? AND username = ?`;
+        db.query(query, [event_id, username], (error, results) => {
+            if (error) {
+                console.error('Error canceling registration:', error);
+                res.status(500).json({ error: 'Failed to cancel registration' });
+                return;
+            }
+            console.log('Registration canceled successfully');
+            res.status(200).json({ message: 'Registration canceled successfully' });
+        });
+    } catch (error) {
+        console.error('Error canceling registration:', error);
+        res.status(500).json({ error: 'Failed to cancel registration' });
+    }
+});
+
+app.post('/events/cancel/:eventId', (req, res) => {
+    const eventId = req.params.eventId;
+
+    // Perform deletion from event_attendees table
+    const deleteAttendeesSql = `DELETE FROM event_attendees WHERE event_id = ?`;
+    db.query(deleteAttendeesSql, eventId, (err, result) => {
+        if (err) {
+            console.error('Error deleting attendees:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        // Perform deletion from event_user_request table
+        const deleteUserRequestsSql = `DELETE FROM event_user_request WHERE event_id = ?`;
+        db.query(deleteUserRequestsSql, eventId, (err, result) => {
+            if (err) {
+                console.error('Error deleting user requests:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+
+            // Perform deletion from event_upvote table
+            const deleteUpvotesSql = `DELETE FROM event_upvote WHERE event_id = ?`;
+            db.query(deleteUpvotesSql, eventId, (err, result) => {
+                if (err) {
+                    console.error('Error deleting upvotes:', err);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                }
+
+                // Perform deletion from event_user_review table
+                const deleteUserReviewsSql = `DELETE FROM event_user_review WHERE event_id = ?`;
+                db.query(deleteUserReviewsSql, eventId, (err, result) => {
+                    if (err) {
+                        console.error('Error deleting user reviews:', err);
+                        res.status(500).json({ error: 'Internal Server Error' });
+                        return;
+                    }
+
+                    // Perform deletion from event_info table
+                    const deleteEventSql = `DELETE FROM event_info WHERE event_id = ?`;
+                    db.query(deleteEventSql, eventId, (err, result) => {
+                        if (err) {
+                            console.error('Error deleting event info:', err);
+                            res.status(500).json({ error: 'Internal Server Error' });
+                            return;
+                        }
+
+                        // Send user notification
+                        const notificationSql = `INSERT INTO user_notification (username, notification_category, notification_info) SELECT DISTINCT username, 6, 'Event canceled' FROM event_user_request WHERE event_id = ?`;
+                        db.query(notificationSql, eventId, (err, result) => {
+                            if (err) {
+                                console.error('Error sending user notification:', err);
+                                res.status(500).json({ error: 'Internal Server Error' });
+                                return;
+                            }
+
+                            // If all deletions and notifications are successful, send success response
+                            res.json({ success: true });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+
+
+
+

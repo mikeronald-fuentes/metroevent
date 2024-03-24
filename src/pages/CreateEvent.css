@@ -1,0 +1,100 @@
+.content {
+    justify-content: center;
+    margin: 60px 150px;
+}
+
+.content h1{
+    margin-bottom: 30px;
+}
+
+.eventtype {
+    margin-top: 30px;
+    display: flex;
+    align-items: center; /* Align items vertically in the flex container */
+}
+
+.eventtype h3 {
+    font-size: smaller;
+    margin-right: 60px;
+}
+
+.radioBut label {
+    margin-right: 20px; /* Add spacing between radio buttons and text */
+}
+
+.information {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.info-column {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.input {
+    border: 2px solid transparent;
+    width: 40em;
+    height: 2.5em;
+    padding-left: 0.8em;
+    outline: none;
+    overflow: hidden;
+    background-color: #F3F3F3;
+    border-radius: 10px;
+    transition: all 0.5s;
+    margin-bottom: 20px;
+}
+
+.input:hover,
+.input:focus{
+    border: 2px solid #4A9DEC;
+    box-shadow: 0px 0px 0px 7px rgb(74, 157, 236, 20%);
+    background-color: white;
+}
+
+.input2 {
+    border: 2px solid transparent;
+    width: 40em;
+    height: 10em; /* Adjust height as needed */
+    padding: 0.6em; /* Set uniform padding */
+    padding-top: 0.4em; /* Adjust top padding to move text to upper-left corner */
+    outline: none;
+    overflow: auto; /* Enable scrolling if content overflows */
+    background-color: #F3F3F3;
+    border-radius: 10px;
+    transition: all 0.5s;
+    margin-bottom: 20px;
+    line-height: 1.5; /* Adjust line-height for vertical alignment */
+}
+
+.input2:hover,
+.input2:focus {
+    border: 2px solid #4A9DEC;
+    box-shadow: 0px 0px 0px 7px rgb(74, 157, 236, 20%);
+    background-color: white;
+}
+
+.button {
+    width: 500px;
+    margin-right: 20px;
+    color: #4A9DEC;
+    background-color:blue; /* Background color for the button */
+}
+
+
+.buttonCont {
+    display: flex;
+    justify-content: center;
+    margin: 50px;
+}
+
+
+
+
+
+
