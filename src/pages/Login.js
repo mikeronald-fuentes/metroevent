@@ -1,21 +1,25 @@
-import React, { useState } from "react";
+// Login.js
+import React, { useState } from 'react';
 import logo from '../images/logo.png';
 import { Typography, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "./LoginStyles.css";
 import axios from "axios";
+import { useAuth } from '../Hooks/Authorization';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://localhost:3000/login', { username, password });
       if (response.data.success) {
         setMessage('Login successful');
+        login(response.data);
         if (response.data.user_type === 0) {
           navigate('/home');
         } else if (response.data.user_type === 1) {
@@ -33,48 +37,48 @@ function Login() {
   };
 
   const handleUsernameChange = (event) => {
-      setUsername(event.target.value);
+    setUsername(event.target.value);
   };
 
   const handlePasswordChange = (event) => {
-      setPassword(event.target.value);
+    setPassword(event.target.value);
   };
 
   return (
-      <div className="container">
-          <div className="blue">
-              <img src={logo} alt="Logo" className="logo" />
-              <Typography variant="h4" className="tag">Log in to your account</Typography>
-              <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
-          </div>
-          <div className="white">
-              <Typography variant="h4" className="tag3">Log in</Typography>
-              <Typography variant="body1" className="subtag3">Secure access</Typography>
-              <Typography variant="h4" className="tag4">Log in</Typography>
-              <Typography variant="body1" className="usernametag">Username</Typography>
-              <TextField
-                  variant="outlined"
-                  placeholder="Enter your username"
-                  className="input1"
-                  value={username}
-                  onChange={handleUsernameChange}
-              />
-              <Typography variant="body1" className="passtag">Password</Typography>
-              <TextField
-                  variant="outlined"
-                  placeholder="Enter your password"
-                  className="input2"
-                  type="password"
-                  value={password}
-                  onChange={handlePasswordChange}
-              />
-              <br />
-              <Button variant="contained" className="loginbutton" onClick={handleLogin}>
-                  <Typography>Log in</Typography>
-              </Button>
-              {message && <div>{message}</div>}
-          </div>
+    <div className="container">
+      <div className="blue">
+        <img src={logo} alt="Logo" className="logo" />
+        <Typography variant="h4" className="tag">Log in to your account</Typography>
+        <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
       </div>
+      <div className="white">
+        <Typography variant="h4" className="tag3">Log in</Typography>
+        <Typography variant="body1" className="subtag3">Secure access</Typography>
+        <Typography variant="h4" className="tag4">Log in</Typography>
+        <Typography variant="body1" className="usernametag">Username</Typography>
+        <TextField
+          variant="outlined"
+          placeholder="Enter your username"
+          className="input1"
+          value={username}
+          onChange={handleUsernameChange}
+        />
+        <Typography variant="body1" className="passtag">Password</Typography>
+        <TextField
+          variant="outlined"
+          placeholder="Enter your password"
+          className="input2"
+          type="password"
+          value={password}
+          onChange={handlePasswordChange}
+        />
+        <br />
+        <Button variant="contained" className="loginbutton" onClick={handleLogin}>
+          <Typography>Log in</Typography>
+        </Button>
+        {message && <div>{message}</div>}
+      </div>
+    </div>
   );
 }
 
