@@ -1,4 +1,3 @@
-// Login.js
 import React, { useState } from 'react';
 import logo from '../images/logo.png';
 import { Typography, TextField, Button } from "@mui/material";
@@ -6,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./LoginStyles.css";
 import axios from "axios";
 import { useAuth } from '../Hooks/Authorization';
+import UserProfile from './UserProfile';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -20,8 +20,9 @@ function Login() {
       if (response.data.success) {
         setMessage('Login successful');
         login(response.data);
+        UserProfile.setUsername(username);
         if (response.data.user_type === 0) {
-          navigate('/home');
+          navigate('/homeuser');
         } else if (response.data.user_type === 1) {
           navigate('/organizer');
         } else if (response.data.user_type === 2) {

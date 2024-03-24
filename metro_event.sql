@@ -80,7 +80,7 @@ CREATE TABLE `event_info` (
 
 CREATE TABLE `event_upvote` (
   `event_id` int(11) NOT NULL,
-  `event_vote_count` bigint(20) NOT NULL
+  `username` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

@@ -368,6 +368,226 @@ app.get('/users', (req, res) => {
     });
 });
 
+//fetch tanan events info
+app.get('/userhome', (req, res) => {
+    const sql = `
+        SELECT 
+            ei.*, 
+            COUNT(eu.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            event_vote_count DESC`;  
+            
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.json(data);
+    });
+});
+
+// para sa vote button green bg
+app.post('/checkupvote', (req, res) => {
+    const { username } = req.body;
+
+    // Query the event_upvote table to check if the user has upvoted each event
+    const sql = `
+        SELECT 
+            ei.event_id,
+            IFNULL(eu.username, '') AS voted_by_user,
+            COUNT(eu.username) AS upvote_count
+        FROM 
+            event_info ei
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id
+        GROUP BY
+            ei.event_id`;
+
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        
+        // Construct response array indicating if the user has upvoted each event
+        const result = data.map(event => ({
+            event_id: event.event_id,
+            has_upvoted: event.voted_by_user ? 1 : 0,
+            upvote_count: event.upvote_count
+        }));
+
+        // Order the results by the number of upvotes (in descending order)
+        result.sort((a, b) => b.upvote_count - a.upvote_count);
+
+        // Filter out any values of has_upvoted that are not 0 or 1
+        const filteredResult = result.filter(event => event.has_upvoted === 0 || event.has_upvoted === 1);
+        
+        res.json(filteredResult);
+    });
+});
+
+// para sa color sa btnRegister
+app.get('/checkregistration', (req, res) => {
+    const { username } = req.body;
+
+    // Query to check if the user is registered for each event and if the registration is accepted
+    const sql = `
+        SELECT 
+            event_id,
+            is_accepted
+        FROM 
+            event_user_request where username = ?
+        `;
+    
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        
+        // Construct response array indicating if the user is registered and if the registration is accepted for each event
+        const result = data.map(event => ({
+            event_id: event.event_id, // 1 if registered, 0 if not registered
+            is_accepted: event.is_accepted
+        }));
+        
+        res.json(result);
+    });
+});
+
+// para sa green bg upvote
+app.post('/addupvote', (req, res) => {
+    const { eventid, username } = req.body;
+
+    const addUpVote = `INSERT INTO event_upvote (event_id, username) VALUES (?, ?)`;
+    db.query(addUpVote, [eventid, username], (err, rows) => {
+        if (err) {
+            console.error('Error executing query to fetch vote count:', err);
+            res.status(500).json({ error: 'Internal Server Error1' });
+            return;
+        }
+        res.status(200).json({ message: 'Successfully up voted event.' });
+        
+    });
+});
+
+// para sa red bg upvoted
+app.post('/removeupvote', (req, res) => {
+    const { eventid, username } = req.body;
+
+    const deleteUpVote = `
+        DELETE FROM event_upvote 
+        WHERE event_id = ? AND username = ?`;
+    db.query( deleteUpVote,[eventid, username], (err, rows) => {
+        if (err) {
+            console.error('Error executing query to fetch vote count:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+    });
+    res.status(200).json({ message: 'Successfully removed up vote on event.' });
+});
+
+
+// para sa buttons be organizer og be admin 
+app.post('/upgradeaccount', (req, res) => {
+    const { username, type } = req.body;
+
+    const checkPreviousRequest = `SELECT * FROM admin_list WHERE username = ?`;
+    db.query(checkPreviousRequest, [username], (err, rows) => {
+        if (err) {
+            console.error('Error checking previous request:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        if (rows.length > 0) {
+            res.status(400).json({ error: 'You already have a pending request for account upgrade' });
+            return;
+        }
+
+        const insertRequest = `INSERT INTO admin_list (username, request_type, is_approved) VALUES (?, ?, 0)`;
+        db.query(insertRequest, [username, type], (err, result) => {
+            if (err) {
+                console.error('Error inserting new request:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+            res.status(200).json({ message: 'Upgrade request submitted successfully' });
+        });
+    });
+});
+
+//para sa register event nya insert sa db
+app.post('/registerevent', (req, res) => {
+    const { username, eventid } = req.body;
+
+    const checkPreviousRequest = `SELECT * FROM event_user_request WHERE username = ? AND event_id = ?`;
+    db.query(checkPreviousRequest, [username, eventid], (err, rows) => {
+        if (err) {
+            console.error('Error checking previous request:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        if (rows.length > 0) {
+            res.status(400).json({ error: 'You already have already requested for this event' });
+            return;
+        }
+
+        const insertRequest = `INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, 0)`;
+        db.query(insertRequest, [eventid, username], (err, result) => {
+            if (err) {
+                console.error('Error inserting new request:', err);
+                res.status(500).json({ error: 'Internal Server Error1' });
+                return;
+            }
+            res.status(200).json({ message: 'Successfully requested' });
+        });
+    });
+});
+
+app.post('/registeraccount', (req, res) => {
+    const { username, firstName, lastName, password } = req.body;
+    console.log(username);
+    // Check if the user has already made a request for this event
+    const findUsername = `SELECT * FROM user_info WHERE username = ?`;
+    db.query(findUsername, [username], (err, rows) => {
+        if (err) {
+            console.error('Error checking previous request:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        // If the user has already made a request, return an error
+        if (rows.length > 0) {
+            res.status(400).json({ error: 'Username already exist' });
+            return;
+        }
+        
+        // If the user hasn't made a request, insert a new request
+        const insertRequest = `INSERT INTO user_info (username, user_type, first_name, last_name, password) VALUES (?, 0, ?, ?, ?)`;
+        db.query(insertRequest, [username, firstName, lastName, password], (err, result) => {
+            if (err) {
+                console.error('Error inserting new request:', err);
+                res.status(500).json({ error: 'Internal Server Error1' });
+                return;
+            }
+            res.status(200).json({ message: 'Successfully registered account', username: {username}, status: 1 });
+        });
+    });
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

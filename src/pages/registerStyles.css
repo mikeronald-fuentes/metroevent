@@ -1,0 +1,48 @@
+.registerScreen{
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .left{
+    width: 50%;
+    height: 100%;
+    background-color: #86A7FC;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .right{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .leftContent{
+    height: 80%;
+    width: 80%;
+    
+  }
+  .image{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .image img{
+    width: 50%;
+    height: 50%;
+  }
+
+  .register{
+    flex: 1 1;
+    background-color: #ffffff;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+  }
