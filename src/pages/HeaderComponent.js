@@ -16,7 +16,7 @@ export default function HeaderComponent() {
         <>
             <header style={styles.header}>
                 <h1 style={styles.title}>Metro Events</h1>
-                <Button color='inherit' onClick={handleLogout}> {/* Add onClick event handler for log out */}
+                <Button color='inherit' onClick={handleLogout}> 
                     <Typography>
                         Log out
                     </Typography>

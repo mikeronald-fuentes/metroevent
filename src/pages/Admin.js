@@ -6,8 +6,7 @@ import { useNavigate } from "react-router-dom";
 function Admin() {
     const { user } = useAuth();
 
-    const [organizerRequests, setOrganizerRequests] = useState([]);
-    const [administratorRequests, setAdministratorRequests] = useState([]);
+    const [requests, setRequests] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,13 +18,14 @@ function Admin() {
         fetch('http://localhost:3000/admin')
             .then(res => res.json())
             .then(data => {
-                const organizerRequest = data.filter(item => item.request_type === 0);
-                const adminRequest = data.filter(item => item.request_type === 1);
-                setOrganizerRequests(organizerRequest);
-                setAdministratorRequests(adminRequest);
+                setRequests(data);
             })
             .catch(err => console.error(err));
     }, [user, navigate]);
+
+    const getRequestTypeLabel = (requestType) => {
+        return requestType === 0 ? "Organizer Request" : "Administrator Request";
+    };
 
     const handleApprove = (username, requestType) => {
         console.log(`Approve button clicked for username: ${username}`);
@@ -38,8 +38,7 @@ function Admin() {
         })
         .then(res => res.json())
         .then(data => {
-            setOrganizerRequests(prevOrganizerRequests => prevOrganizerRequests.filter(item => item.username !== username));
-            setAdministratorRequests(prevAdministratorRequests => prevAdministratorRequests.filter(item => item.username !== username));
+            setRequests(prevRequests => prevRequests.filter(item => item.username !== username));
         })
         .catch(err => console.error(err));
     };    
@@ -56,8 +55,7 @@ function Admin() {
         .then(res => res.json())
         .then(data => {
             console.log(data);
-            setOrganizerRequests(prevOrganizerRequests => prevOrganizerRequests.filter(item => item.username !== username));
-            setAdministratorRequests(prevAdministratorRequests => prevAdministratorRequests.filter(item => item.username !== username));
+            setRequests(prevRequests => prevRequests.filter(item => item.username !== username));
         })
         .catch(err => console.error(err));
     };       
@@ -65,34 +63,37 @@ function Admin() {
     return (
         <>
             <HeaderComponent />
-            <div style={{ marginLeft: '20px' }}>
-                <h2>Organizer Requests</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {organizerRequests.map((item, index) => (
-                        <div key={item.id || index} style={{ border: '1px solid #ccc', borderRadius: '5px', padding: '10px', margin: '10px', minWidth: '200px', backgroundColor: '#e6f7ff' }}>
-                            <h3>{item.first_name} {item.last_name}</h3>
-                            <p>{item.description}</p>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <button style={{ backgroundColor: 'green', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }} onClick={() => handleApprove(item.username, item.requestType)}>Approve</button>
-                                <button style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }} onClick={() => handleDecline(item.username, item.requestType)}>Decline</button>
-                            </div>
+            <div style={{ marginTop: '5%', display: 'flex', flexDirection: 'column', alignItems: 'start', width: '100%' }}>
+                <div style={{ margin: 'auto', width: '80%' }}>
+                    <h1>Requests</h1>
+                    <div style={{ boxShadow: '3px 4px 8px rgba(0, 0, 0, 0.1)', backgroundColor: '#f2f2f2', padding: '30px', borderRadius: '10px', margin: 'auto' }}>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ textAlign: 'center', padding: '15px', width: '30%' }}>Name</th>
+                                        <th style={{ textAlign: 'center', padding: '15px', width: '40%' }}>Description</th>
+                                        <th style={{ textAlign: 'center', padding: '15px', width: '30%' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody style={{ textAlign: 'center' }}>
+                                    {requests.map((item, index) => (
+                                        <tr key={item.id || index} style={{ fontSize: '1.2em', marginBottom: '20px', marginRight: '20px' }}>
+                                            <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>{item.first_name} {item.last_name}</td>
+                                            <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>{item.request_type === 0 ? 'Organizer Request' : 'Administrator Request'}</td>
+                                            <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>
+                                                <button style={{ backgroundColor: 'green', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px', marginRight: '10px' }} onClick={() => handleApprove(item.username, item.requestType)}>Approve</button>
+                                                <button style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }} onClick={() => handleDecline(item.username, item.requestType)}>Decline</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    ))}
-                </div>
-                <h2>Administrator Requests</h2>
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {administratorRequests.map((item, index) => (
-                        <div key={item.id || index} style={{ border: '1px solid #ccc', borderRadius: '5px', padding: '10px', margin: '10px', minWidth: '200px', backgroundColor: '#ffe6e6' }}>
-                            <h3>{item.first_name} {item.last_name}</h3>
-                            <p>{item.description}</p>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <button style={{ backgroundColor: 'green', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }} onClick={() => handleApprove(item.username, item.requestType)}>Approve</button>
-                                <button style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px' }} onClick={() => handleDecline(item.username, item.requestType)}>Decline</button>
-                            </div>
-                        </div>
-                    ))}
+                    </div>
                 </div>
             </div>
+
         </>
     );
 }

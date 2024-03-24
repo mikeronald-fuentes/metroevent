@@ -52,7 +52,6 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    // Endpoint logic for /admin
     const sql = "SELECT admin_list.request_type, admin_list.username, admin_list.is_approved, user_info.first_name, user_info.last_name FROM admin_list JOIN user_info ON admin_list.username = user_info.username WHERE admin_list.is_approved = 0";
 
     db.query(sql, (err, data) => {
