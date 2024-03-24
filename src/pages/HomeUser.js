@@ -124,11 +124,9 @@ const HomeUser = () => {
         })
         .catch(err => console.error(err));
     };
-
+    
     const handleUpVote = (eventid, username, index) => {
-        // para when up vote button was clicked
         if (btnVote[index]?.[0] === 'red') {
-            //reduce 1 upvote count
             fetch(`http://localhost:3000/removeupvote`, {
                 method: 'POST',
                 headers: {
@@ -139,7 +137,7 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => {
                 const { message, newCount } = data;
-                console.log(message); // Log the message
+                console.log(message);
                 console.log(newCount);
                 setBtnVote(prevBtnVote => {
                     const updatedBtnVote = [...prevBtnVote];
@@ -149,6 +147,11 @@ const HomeUser = () => {
                 
                 if (data.message) {
                     toast.success(data.message);
+                    // Fetch updated event details after upvote action
+                    fetch('http://localhost:3000/userhome')
+                        .then(res => res.json())
+                        .then(data => setEventsDetails(data))
+                        .catch(err => console.error(err));
                 } else if (data.error) {
                     toast.error(data.error);
                 }
@@ -167,7 +170,7 @@ const HomeUser = () => {
                 const { message, newCount } = data;
                 console.log(message); 
                 console.log(newCount);
-
+    
                 setBtnVote(prevBtnVote => {
                     const updatedBtnVote = [...prevBtnVote];
                     updatedBtnVote[index] = ['red', 'Upvoted']; 
@@ -176,6 +179,11 @@ const HomeUser = () => {
                 
                 if (data.message) {
                     toast.success(data.message);
+                    // Fetch updated event details after upvote action
+                    fetch('http://localhost:3000/userhome')
+                        .then(res => res.json())
+                        .then(data => setEventsDetails(data))
+                        .catch(err => console.error(err));
                 } else if (data.error) {
                     toast.error(data.error);
                 }
@@ -183,7 +191,7 @@ const HomeUser = () => {
             .catch(err => console.error(err));
         }
     };
-    
+
     // format date
     const handleDate = (date) => {
         const timestamp = date;
@@ -281,14 +289,14 @@ const HomeUser = () => {
                         <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: '7px'}}>
                             <div style={{marginRight: 'auto'}}>
                             <Button 
-    variant="contained" 
-    className="btnAdmin" 
-    style={{ backgroundColor: btnRegister[index]?.[0] || 'blue' }} 
-    onClick={() => handleRegisterEvent(username, item.event_id, index)}
-    disabled={btnRegister[index]?.[2] || false} // Use the third element for disabled state
->
-    <Typography>{btnRegister[index]?.[1] || 'Register'}</Typography>
-</Button>
+                                variant="contained" 
+                                className="btnAdmin" 
+                                style={{ backgroundColor: btnRegister[index]?.[0] || 'blue' }} 
+                                onClick={() => handleRegisterEvent(username, item.event_id, index)}
+                                disabled={btnRegister[index]?.[2] || false} // Use the third element for disabled state
+                            >
+                                <Typography>{btnRegister[index]?.[1] || 'Register'}</Typography>
+                            </Button>
                             </div>
                             <div>
                                 <Button variant="contained" 
