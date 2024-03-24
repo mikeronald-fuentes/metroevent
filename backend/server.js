@@ -34,12 +34,8 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT username, user_type FROM user_info WHERE username = ' + db.escape(username) + ' AND password = ' + db.escape(password);
 
-<<<<<<< HEAD
 
     db.query(sql, [username, password], (err, result) => {
-=======
-    db.query(sql, (err, result) => {
->>>>>>> 81159983bcd1b9e97ec90bd3ec52f4a7945ccf24
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -230,7 +226,6 @@ app.post('/decline', (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 app.post('/addevent', (req, res) => {
     const {
         organizer,
@@ -364,8 +359,6 @@ app.get('/events/attended/:username', (req, res) => {
 
 
 
-=======
->>>>>>> 81159983bcd1b9e97ec90bd3ec52f4a7945ccf24
 app.get('/users', (req, res) => {
     const sql = "SELECT * FROM user_info";
     db.query(sql, (err, data) => {
@@ -382,7 +375,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-<<<<<<< HEAD
 
 app.post('/events/join', (req, res) => {
     const { event_id, username } = req.body;
@@ -525,5 +517,3 @@ app.post('/events/cancel/:eventId', (req, res) => {
 
 
 
-=======
->>>>>>> 81159983bcd1b9e97ec90bd3ec52f4a7945ccf24
