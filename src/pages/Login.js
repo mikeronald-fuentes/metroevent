@@ -67,7 +67,7 @@ function Login() {
         <TextField
           variant="outlined"
           placeholder="Enter your password"
-          className="input2"
+          className="input1"
           type="password"
           value={password}
           onChange={handlePasswordChange}
@@ -79,6 +79,7 @@ function Login() {
         {message && <div>{message}</div>}
       </div>
     </div>
+
   );
 }
 

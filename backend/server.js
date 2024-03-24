@@ -34,8 +34,7 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT username, user_type FROM user_info WHERE username = ' + db.escape(username) + ' AND password = ' + db.escape(password);
 
-
-    db.query(sql, [username, password], (err, result) => {
+    db.query(sql, (err, result) => {
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -46,8 +45,6 @@ app.post('/login', (req, res) => {
             console.log('Login failed');
             res.status(401).json({ success: false, message: 'Invalid username or password' });
         } else {
-            // Set the username in the session
-            req.session.username = username;
             console.log('Login successful');
             res.json({ success: true, message: 'Login successful', user_type: result[0].user_type });
         }

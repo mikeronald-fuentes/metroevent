@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import CustomModal from './Components/CustomModal';
 import CustomJoinModal from './Components/CustomJoinModal';
 import CustomUpModal from './Components/CustomUpModal';
+import { useAuth } from '../Hooks/Authorization';
 
 export default function OrganizerHome() {
     const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function OrganizerHome() {
     const [selectedEvent, setSelectedEvent] = useState(null); // State to store selected event
     const [isJoinEvent, setIsJoinEvent] = useState(false); // State to check if it's a join event
     const [isUpcomingEvent, setIsUpcomingEvent] = useState(false); // State to check if it's an upcoming event
+    const [requests, setRequests] = useState([]);
+    const { user } = useAuth();
 
     useEffect(() => {
         // Fetch events when the component mounts
@@ -25,15 +28,18 @@ export default function OrganizerHome() {
     }, []);
 
     useEffect(() => {
-        // Check if the user is logged in (retrieve username from local storage)
-        const storedUsername = localStorage.getItem('username');
-        if (storedUsername) {
-            setUsername(storedUsername);
-        } else {
-            // If not logged in, navigate to the login page
+        if (!user) {
             navigate('/login');
+            return;
         }
-    }, []);
+
+        fetch('http://localhost:3000/admin')
+            .then(res => res.json())
+            .then(data => {
+                setRequests(data);
+            })
+            .catch(err => console.error(err));
+    }, [user, navigate]);
 
     const fetchEvents = async () => {
         try {

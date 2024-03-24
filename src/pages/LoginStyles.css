@@ -18,15 +18,15 @@
   flex: 1;
   background-color: #86a7fc;
   width: 50%;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
 }
 
 .logo {
-  width: 40%;
-  height: 40%;
+  width: 50%;
+  height: 50%;
   position: absolute;
   top: 20%;
 }

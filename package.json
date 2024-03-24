@@ -10,11 +10,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
-<<<<<<< HEAD
     "bootstrap": "^5.3.3",
-=======
-    "jsonwebtoken": "^9.0.2",
->>>>>>> 81159983bcd1b9e97ec90bd3ec52f4a7945ccf24
     "mui": "^0.0.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
