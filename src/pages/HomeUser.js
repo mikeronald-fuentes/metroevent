@@ -336,9 +336,9 @@ const HomeUser = () => {
         const timestamp = date;
         const dateObject = new Date(timestamp);
 
-        const year = dateObject.getFullYear(); 
-        const month = dateObject.getMonth() + 1;
-        const day = dateObject.getDate(); 
+        let year = dateObject.getFullYear(); 
+        let month = dateObject.getMonth() + 1;
+        let day = dateObject.getDate(); 
 
         const formattedDate = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year}`;
         return formattedDate;
@@ -349,9 +349,9 @@ const HomeUser = () => {
         const timestamp = time;
         const dateObject = new Date(timestamp);
         
-        const hour = dateObject.getHours();
-        const minute = dateObject.getMinutes();
-        const period = hour >= 12 ? 'PM' : 'AM';
+        let hour = dateObject.getHours();
+        let minute = dateObject.getMinutes();
+        let period = hour >= 12 ? 'PM' : 'AM';
 
         if (hour > 12) {
             hour -= 12;
@@ -530,20 +530,24 @@ const HomeUser = () => {
                 </div>
             </div>)}
         </div>
-        {notifications.length > 0 && (
-            <div style={{width: '21%'}}>
-                <div className='notificationContainer'>
-                    <div style={{marginTop: '10px', paddingLeft: '20px'}}><h2>Notifications</h2></div>
-                    <div style={{overflowX: 'auto'}}>
-                    {Array.isArray(notifications) && notifications.map((item, index)=> (
-                        <div className='notificationCard'>
-                            <div><h6>{item.notification}</h6></div>
-                            <div>Message: {item.text}</div>
-                        </div>
-                    ))}
+        <div style={{width: '21%'}}>
+            <div className='notificationContainer'>
+                <div style={{marginTop: '10px', paddingLeft: '20px'}}><h2>Notifications</h2></div>
+                <div style={{overflowX: 'auto'}}>
+                {Array.isArray(notifications) && notifications.map((item, index)=> (
+                    <div className='notificationCard'>
+                        <div><h6>{item.notification}</h6></div>
+                        <div>Message: {item.text}</div>
                     </div>
+                )) }
                 </div>
-            </div>)}
+                {notifications.length <= 0 &&
+                    <div style={{display: 'flex', justifyContent: 'center', alignContent: 'center', padding: 'auto'}}>
+                        <h6>No Notifications</h6>
+                    </div>
+                }
+            </div>
+        </div>
         </div>
     );
 };

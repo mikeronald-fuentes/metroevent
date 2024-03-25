@@ -176,6 +176,7 @@
   .notificationContainer{
     width: 100%;
     height: auto;
+    min-height: 20vh;
     margin-top: 10px;
     margin-right: 50px;
     margin-bottom: 20px;

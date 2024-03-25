@@ -369,7 +369,7 @@ app.get('/users', (req, res) => {
 app.post('/joinevents', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.*, 
             COUNT(eu.event_id) AS event_vote_count
@@ -403,7 +403,7 @@ app.post('/joinevents', (req, res) => {
 app.post('/requestedevents', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.*, 
             COUNT(eu.event_id) AS event_vote_count
@@ -437,7 +437,7 @@ app.post('/requestedevents', (req, res) => {
 app.post('/registeredevents', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.*, 
             COUNT(eu.event_id) AS event_vote_count
@@ -469,7 +469,7 @@ app.post('/registeredevents', (req, res) => {
 
 // fetch past events
 app.get('/pastevents', (req, res) => {
-    const sql = `
+    let sql = `
         SELECT 
             ei.*, 
             COUNT(eu.event_id) AS event_vote_count
@@ -499,7 +499,7 @@ app.get('/pastevents', (req, res) => {
 app.post('/checkjoinupvote', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.event_id,
             IFNULL(eu.username, '') AS voted_by_user,
@@ -544,7 +544,7 @@ app.post('/checkjoinupvote', (req, res) => {
 app.post('/checkrequestedupvote', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.event_id,
             IFNULL(eu.username, '') AS voted_by_user,
@@ -588,7 +588,7 @@ app.post('/checkrequestedupvote', (req, res) => {
 app.post('/checkregisteredupvote', (req, res) => {
     const { username } = req.body;
 
-    const sql = `
+    let sql = `
         SELECT 
             ei.event_id,
             IFNULL(eu.username, '') AS voted_by_user,
@@ -633,7 +633,7 @@ app.post('/checkregisteredupvote', (req, res) => {
 app.post('/addupvote', (req, res) => {
     const { eventid, username } = req.body;
 
-    const addUpVote = `INSERT INTO event_upvote (event_id, username) VALUES (?, ?)`;
+    let addUpVote = `INSERT INTO event_upvote (event_id, username) VALUES (?, ?)`;
     db.query(addUpVote, [eventid, username], (err, rows) => {
         if (err) {
             console.error('Error executing query to fetch vote count:', err);
@@ -648,7 +648,7 @@ app.post('/addupvote', (req, res) => {
 app.post('/removeupvote', (req, res) => {
     const { eventid, username } = req.body;
 
-    const deleteUpVote = `
+    let deleteUpVote = `
         DELETE FROM event_upvote 
         WHERE event_id = ? AND username = ?`;
     db.query( deleteUpVote,[eventid, username], (err, rows) => {
@@ -666,7 +666,7 @@ app.post('/removeupvote', (req, res) => {
 app.post('/upgradeaccount', (req, res) => {
     const { username, type } = req.body;
 
-    const checkPreviousRequest = `SELECT * FROM admin_list WHERE username = ?`;
+    let checkPreviousRequest = `SELECT * FROM admin_list WHERE username = ?`;
     db.query(checkPreviousRequest, [username], (err, rows) => {
         if (err) {
             console.error('Error checking previous request:', err);
@@ -695,7 +695,7 @@ app.post('/upgradeaccount', (req, res) => {
 app.post('/registerevent', (req, res) => {
     const { username, eventid } = req.body;
 
-    const checkPreviousRequest = `SELECT * FROM event_user_request WHERE username = ? AND event_id = ?`;
+    let checkPreviousRequest = `SELECT * FROM event_user_request WHERE username = ? AND event_id = ?`;
     db.query(checkPreviousRequest, [username, eventid], (err, rows) => {
         if (err) {
             console.error('Error checking previous request:', err);
@@ -725,7 +725,7 @@ app.post('/registeraccount', (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     console.log(username);
 
-    const findUsername = `SELECT * FROM user_info WHERE username = ?`;
+    let findUsername = `SELECT * FROM user_info WHERE username = ?`;
     db.query(findUsername, [username], (err, rows) => {
         if (err) {
             console.error('Error checking previous request:', err);
@@ -753,7 +753,7 @@ app.post('/registeraccount', (req, res) => {
 app.post('/notifications', (req, res) => {
     const { username } = req.body;
 
-    const sql = 
+    let sql = 
         `SELECT 
             nc.notification_type,
             un.notification_info 
@@ -786,7 +786,7 @@ app.listen(PORT, () => {
 
 app.post('/events/join', (req, res) => {
     const { event_id, username } = req.body;
-    const sql = 'INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, ?)';
+    let sql = 'INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, ?)';
 
     const isAccepted = false;
 
@@ -806,7 +806,7 @@ app.post('/events/join', (req, res) => {
 app.get('/events/hasRequested/:eventId', (req, res) => {
     const { eventId } = req.params;
     const { username } = req.body;
-    const sql = `
+    let sql = `
         SELECT *
         FROM event_user_request
         WHERE event_id = ? AND username = ?`;
