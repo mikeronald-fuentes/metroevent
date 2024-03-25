@@ -146,3 +146,56 @@
   .btnUpVote{
     background-color: green;
   }
+
+  .notification-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  /* Notification Container Style */
+  .notification-container {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; /* Initially hidden */
+    z-index: 998;
+  }
+  
+  /* Notification Item Style */
+  .notification-item {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Notification Item Title Style */
+  .notification-title {
+    font-weight: bold;
+  }
+  
+  /* Notification Item Content Style */
+  .notification-content {
+    margin-top: 5px;
+  }

@@ -14,15 +14,22 @@ const HomeUser = () => {
     const [checkBtnRegister, setCheckBtnRegister] = useState([]);
     const [btnRegister, setBtnRegister] = useState([]);
     const [username, setUsername] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
     const { logout } = useAuth(); 
     const navigate = useNavigate();
 
     useEffect(() => {
+        setUsername(UserProfile.getUsername());
+        if (!username) {
+            navigate('/login');
+            return;
+        }
         fetch('http://localhost:3000/userhome')
             .then(res => res.json())
             .then(data => setEventsDetails(data))
             .catch(err => console.error(err));
-            setUsername(UserProfile.getUsername());
+            
     }, []);
     
     // para sa initial color of the register button
@@ -191,7 +198,39 @@ const HomeUser = () => {
             .catch(err => console.error(err));
         }
     };
+    
 
+    useEffect(() => {
+        // Fetch user's notifications when the component mounts
+        fetchNotifications(username);
+    }, []);
+
+    const fetchNotifications = (username) => {
+        // Fetch user's notifications from the backend
+        fetch('http://localhost:3000/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setNotifications(data);
+        })
+        .catch(err => console.error(err));
+    };
+    
+
+    const toggleNotificationVisibility = () => {
+        // Toggle the visibility of the notification div
+        setShowNotifications(prevState => !prevState);
+        if (!showNotifications) {
+            // Fetch notifications when the notification div is shown
+            fetchNotifications();
+        }
+    };
+    
     // format date
     const handleDate = (date) => {
         const timestamp = date;
@@ -234,6 +273,18 @@ const HomeUser = () => {
         <div className='userHomeScreen'>
             <div className='header'>
                 <div className='title'>Metro Events</div>
+                <div className="notification-container">
+            <button onClick={toggleNotificationVisibility}>Notifications</button>
+            {showNotifications && (
+                <div className="notification-list">
+                    {notifications.map(notification => (
+                        <div key={notification.notification} className="notification-item">
+                            {notification.text}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
                 <div className='logout'><Button color='inherit' onClick={handleLogout}> {/* Add onClick event handler for log out */}
                     <Typography>
                         Log out

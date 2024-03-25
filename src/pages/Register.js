@@ -4,29 +4,36 @@ import { Typography, TextField, Button } from "@mui/material";
 import logo from '../images/logo.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UserProfile from './UserProfile';
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         username: '',
         firstName: '',
         lastName: '',
         password: '',
     });
-
+    
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setFormData({ ...formData, [name]: value });
     };
 
     const handleRegister = () => {
-        // Perform validation checks
+        if(formData.username === '' || formData.firstName === '' || formData.lastName === ''|| formData.password === ''){
+            toast.error('Please fill all the information needed.');
+            return;
+        }
         if (formData.password !== formData.confirmPassword) {
             toast.error('Password does not match.');
             return;
         }
+
         console.log(formData.firstName);
         console.log(formData.lastName);
-        // Send data to backend for registration
         fetch('http://localhost:3000/registeraccount', {
             method: 'POST',
             headers: {
@@ -36,11 +43,25 @@ const Register = () => {
         })
         .then(res => res.json())
         .then(data => {
-            console.log(data); // Log the response for debugging
-            // Optionally, you can show a success message to the user
-            if(data.message){
+            console.log(data); 
+            if (data.message) {
                 toast.success(data.message);
-            }else if(data.error){
+                setTimeout(() => {
+                    UserProfile.setUsername(data.user_name);
+                    setFormData({
+                        username: '',
+                        firstName: '',
+                        lastName: '',
+                        password: '',
+                        confirmPassword: ''
+                    });
+                toast.success('Logging in');
+                }, 1000);
+                setTimeout(() => {
+                    
+                    navigate('/homeuser');
+                }, 2000);
+            } else if (data.error) {
                 toast.error(data.error);
             }
         })

@@ -582,11 +582,40 @@ app.post('/registeraccount', (req, res) => {
                 res.status(500).json({ error: 'Internal Server Error1' });
                 return;
             }
-            res.status(200).json({ message: 'Successfully registered account', username: {username}, status: 1 });
+            res.status(200).json({ message: 'Successfully registered account', user_name: username, status: 1 });
         });
     });
 });
 
+app.post('/notifications', (req, res) => {
+    const { username } = req.body;
+
+    // Query the user_notification table to fetch notifications for the given username
+    const sql = `
+        SELECT 
+            nc.notification_type,
+            un.notification_info
+        FROM 
+            user_notification un
+        INNER JOIN 
+            notification_category nc ON un.notification_category = nc.notification_id
+        WHERE 
+            un.username = ?`;
+
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        const result = data.map(event => ({
+            notification: event.notification_type, // 1 if registered, 0 if not registered
+            text: event.notification_info
+        }));
+        // Send the notifications data as the response
+        res.json(data);
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
