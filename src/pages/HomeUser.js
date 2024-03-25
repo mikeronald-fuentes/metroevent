@@ -11,7 +11,11 @@ const HomeUser = () => {
     const [eventsDetails, setEventsDetails] = useState([]);
     const [upVote, setUpVote] = useState('');
     const [btnVote, setBtnVote] = useState([]);
-    const [checkBtnRegister, setCheckBtnRegister] = useState([]);
+    const [btnVoteRequested, setBtnVoteRequested] = useState([]);
+    const [btnVoteRegistered, setBtnVoteRegistered] = useState([]);
+    
+    const [requestedEvents, setRequestedEvents] = useState([]);
+    const [registeredEvents, setRegisteredEvents] = useState([]);
     const [pastevents, setPastEvents] = useState([]);
     const [btnRegister, setBtnRegister] = useState([]);
     const [username, setUsername] = useState([]);
@@ -22,48 +26,64 @@ const HomeUser = () => {
 
     useEffect(() => {
         setUsername(UserProfile.getUsername());
+        console.log(username);
         if (!username) {
             navigate('/login');
             return;
         }
-        fetch('http://localhost:3000/userhome')
-            .then(res => res.json())
-            .then(data => setEventsDetails(data))
-            .catch(err => console.error(err));
-        fetch('http://localhost:3000/pastevents')
-            .then(res => res.json())
-            .then(data => setPastEvents(data))
-            .catch(err => console.error(err));
-    }, []);
-    
-    // para sa initial color of the register button
-    useEffect(() => {
-        fetch('http://localhost:3000/checkupvote', {
+        fetchingData();
+        fetchingStyle();
+    }, [username]);
+
+    const fetchingData = () => {
+        fetch('http://localhost:3000/joinevents',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ username })
         })
-        .then(res => res.json())
-        .then(data => {
-            setUpVote(data);
-            const initialState = data.map(item => {
-                if (item.has_upvoted === 1) {
-                    return ['red', 'Upvoted'];
-                } else {
-                    return ['green', 'Upvote'];
-                }
-            });
-            setBtnVote(initialState);
-        })
-        .catch(err => console.error(err));
-    }, [eventsDetails, username]);
+            .then(res => res.json())
+            .then(data => {
+                setEventsDetails(data)
+            })
+            .catch(err => console.error(err));
 
+        fetch('http://localhost:3000/requestedevents',{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setRequestedEvents(data)
+                })
+                .catch(err => console.error(err));
+
+            fetch('http://localhost:3000/registeredevents',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        setRegisteredEvents(data)
+                    })
+                    .catch(err => console.error(err));
+
+        fetch('http://localhost:3000/pastevents')
+            .then(res => res.json())
+            .then(data => setPastEvents(data))
+            .catch(err => console.error(err));
+    }
     // para sa initial color of the register button
-    useEffect(() => {
-        fetch('http://localhost:3000/checkregistered', {
-            method: 'GET',
+    const fetchingStyle = () => {
+        fetch('http://localhost:3000/checkjoinupvote', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -74,18 +94,60 @@ const HomeUser = () => {
             setUpVote(data);
             console.log(data);
             const initialState = data.map(item => {
-                if (item.is_registered === 0) {
-                    return ['blue', 'Register', false];
-                } else if (item.is_registered === 1 && item.is_accepted === 0) {
-                    return ['grey', 'Requested', true];
-                } else if (item.is_registered === 1 && item.is_accepted === 1) {
-                    return ['grey', 'Registered', true];
+                if (item.has_upvoted === 1) {
+                    return ['red', 'Upvoted'];
+                } else {
+                    return ['green', 'Upvote'];
                 }
             });
-            setBtnRegister(initialState);
+            setBtnVote(initialState);
         })
         .catch(err => console.error(err));
-    }, [eventsDetails, username]);
+
+        fetch('http://localhost:3000/checkregisteredupvote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setUpVote(data);
+            console.log(data);
+            const initialState = data.map(item => {
+                if (item.has_upvoted === 1) {
+                    return ['red', 'Upvoted'];
+                } else {
+                    return ['green', 'Upvote'];
+                }
+            });
+            setBtnVoteRegistered(initialState);
+        })
+        .catch(err => console.error(err));
+
+        fetch('http://localhost:3000/checkrequestedupvote', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setUpVote(data);
+            console.log(data);
+            const initialState = data.map(item => {
+                if (item.has_upvoted === 1) {
+                    return ['red', 'Upvoted'];
+                } else {
+                    return ['green', 'Upvote'];
+                }
+            });
+            setBtnVoteRequested(initialState);
+        })
+        .catch(err => console.error(err));
+    };
 
     // upgrade account
     const handleUpgradeAccount = (username, type) => {
@@ -112,11 +174,6 @@ const HomeUser = () => {
     //
     const handleRegisterEvent = (username, eventid, index) => {
         console.log('nakasud');
-        setBtnRegister(prevBtnRegister => {
-            const btnReg = [...prevBtnRegister];
-            btnReg[index] = ['grey', 'Requested'];
-            return btnReg;
-        });
         fetch(`http://localhost:3000/registerevent`, {
             method: 'POST',
             headers: {
@@ -127,6 +184,8 @@ const HomeUser = () => {
         .then(res => res.json())
         .then(data => {
             console.log(data);
+            fetchingData();
+            fetchingStyle();
             if(data.message){
                 toast.success(data.message);
             }else if(data.error){
@@ -150,19 +209,11 @@ const HomeUser = () => {
                 const { message, newCount } = data;
                 console.log(message);
                 console.log(newCount);
-                setBtnVote(prevBtnVote => {
-                    const updatedBtnVote = [...prevBtnVote];
-                    updatedBtnVote[index] = ['green', 'Up Vote']; 
-                    return updatedBtnVote;
-                });
-                
+                fetchingData();
+                fetchingStyle();
                 if (data.message) {
                     toast.success(data.message);
                     // Fetch updated event details after upvote action
-                    fetch('http://localhost:3000/userhome')
-                        .then(res => res.json())
-                        .then(data => setEventsDetails(data))
-                        .catch(err => console.error(err));
                 } else if (data.error) {
                     toast.error(data.error);
                 }
@@ -181,20 +232,111 @@ const HomeUser = () => {
                 const { message, newCount } = data;
                 console.log(message); 
                 console.log(newCount);
-    
-                setBtnVote(prevBtnVote => {
-                    const updatedBtnVote = [...prevBtnVote];
-                    updatedBtnVote[index] = ['red', 'Upvoted']; 
-                    return updatedBtnVote;
-                });
-                
+                fetchingData();
+                fetchingStyle();
                 if (data.message) {
                     toast.success(data.message);
                     // Fetch updated event details after upvote action
-                    fetch('http://localhost:3000/userhome')
-                        .then(res => res.json())
-                        .then(data => setEventsDetails(data))
-                        .catch(err => console.error(err));
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    };
+
+    const handleUpVoteRegistered = (eventid, username, index) => {
+        if (btnVoteRegistered[index]?.[0] === 'red') {
+            fetch(`http://localhost:3000/removeupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid, username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const { message, newCount } = data;
+                console.log(message);
+                console.log(newCount);
+                fetchingData();
+                fetchingStyle();
+                if (data.message) {
+                    toast.success(data.message);
+                    // Fetch updated event details after upvote action
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        } else {
+            fetch(`http://localhost:3000/addupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid , username})
+            })
+            .then(res => res.json())
+            .then(data => {
+                const { message, newCount } = data;
+                console.log(message); 
+                console.log(newCount);
+                fetchingData();
+                fetchingStyle();
+                if (data.message) {
+                    toast.success(data.message);
+                    // Fetch updated event details after upvote action
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    };
+
+    const handleUpVoteRequested = (eventid, username, index) => {
+        if (btnVoteRequested[index]?.[0] === 'red') {
+            fetch(`http://localhost:3000/removeupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid, username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const { message, newCount } = data;
+                console.log(message);
+                console.log(newCount);
+                fetchingData();
+                fetchingStyle();
+                if (data.message) {
+                    toast.success(data.message);
+                    // Fetch updated event details after upvote action
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        } else {
+            fetch(`http://localhost:3000/addupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid , username})
+            })
+            .then(res => res.json())
+            .then(data => {
+                const { message, newCount } = data;
+                console.log(message); 
+                console.log(newCount);
+                fetchingData();
+                fetchingStyle();
+                if (data.message) {
+                    toast.success(data.message);
+                    // Fetch updated event details after upvote action
                 } else if (data.error) {
                     toast.error(data.error);
                 }
@@ -307,7 +449,7 @@ const HomeUser = () => {
             <div className='joinEvents'>
                 <div className='txtUpcomming'>Join Event</div>
                 <div className='cards'>
-                {eventsDetails.map((item, index)=> (
+                {Array.isArray(eventsDetails) && eventsDetails.map((item, index)=> (
                     <div key={index} index={index} className='eventCards' >
                         <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
                             <div style={{width:'100%', display: 'flex'}}>
@@ -360,6 +502,116 @@ const HomeUser = () => {
                                     onClick={() => handleUpVote(item.event_id, username, index)}
                                     >
                                     <Typography>{btnVote[index]?.[1]}</Typography>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    ))}
+                </div>
+            </div>
+            <div className='joinEvents'>
+                <div className='txtUpcomming'>Registered Events</div>
+                <div className='cards'>
+                {Array.isArray(registeredEvents) && registeredEvents.map((item, index)=> (
+                    <div key={index} index={index} className='eventCards' >
+                        <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
+                            <div style={{width:'100%', display: 'flex'}}>
+                                <div className='eventName'>
+                                    {item.event_name}
+                                </div>
+                                <div className='count'>
+                                <span class="icon">&#x21e7;</span>{item.event_vote_count}
+                                </div>
+                            </div>
+                        <div className='organizer'>
+                            <i>by {item.event_organizer}</i>
+                        </div>
+                        <div className='description'>
+                           <span>Description: </span> {item.event_description}
+                        </div>
+                        <div className='type'>
+                            <span>Type: </span> {item.event_type}
+                        </div>
+                        <div className='limit'>
+                           <span>People Limit: </span> {item.event_participants_limit}
+                        </div>
+                        <div className='location'>
+                            <span>Location: </span> {item.event_location}
+                        </div>
+                        <div className='date'>
+                            <span>Date: </span> {handleDate(item.event_date)}
+                        </div>
+                        <div className='time' >
+                            <span>Time: </span>{handleTime(item.event_time)}
+                        </div>
+                        </div>
+                        <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: '7px', alignItems: 'center'}}>
+                            <div style={{marginRight: 'auto'}}>
+                                <Typography>Registered</Typography>
+                            </div>
+                            <div>
+                                <Button variant="contained" 
+                                    className="btnAdmin"
+                                    style={{backgroundColor: btnVoteRegistered[index]?.[0] === 'red' ? 'red' : 'green',
+                                        color: btnVoteRegistered[index]?.[0] === 'white'}}
+                                    onClick={() => handleUpVoteRegistered(item.event_id, username, index)}
+                                    >
+                                    <Typography>{btnVoteRegistered[index]?.[1]}</Typography>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    ))}
+                </div>
+            </div>
+            <div className='joinEvents'>
+                <div className='txtUpcomming'>Requested Events</div>
+                <div className='cards'>
+                {Array.isArray(requestedEvents) && requestedEvents.map((item, index)=> (
+                    <div key={index} index={index} className='eventCards' >
+                        <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
+                            <div style={{width:'100%', display: 'flex'}}>
+                                <div className='eventName'>
+                                    {item.event_name}
+                                </div>
+                                <div className='count'>
+                                <span class="icon">&#x21e7;</span>{item.event_vote_count}
+                                </div>
+                            </div>
+                        <div className='organizer'>
+                            <i>by {item.event_organizer}</i>
+                        </div>
+                        <div className='description'>
+                           <span>Description: </span> {item.event_description}
+                        </div>
+                        <div className='type'>
+                            <span>Type: </span> {item.event_type}
+                        </div>
+                        <div className='limit'>
+                           <span>People Limit: </span> {item.event_participants_limit}
+                        </div>
+                        <div className='location'>
+                            <span>Location: </span> {item.event_location}
+                        </div>
+                        <div className='date'>
+                            <span>Date: </span> {handleDate(item.event_date)}
+                        </div>
+                        <div className='time' >
+                            <span>Time: </span>{handleTime(item.event_time)}
+                        </div>
+                        </div>
+                        <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: '7px', alignItems: 'center'}}>
+                            <div style={{marginRight: 'auto'}}>
+                                <Typography>Requested</Typography>
+                            </div>
+                            <div>
+                                <Button variant="contained" 
+                                    className="btnAdmin"
+                                    style={{backgroundColor: btnVoteRequested[index]?.[0] === 'red' ? 'red' : 'green',
+                                        color: btnVote[index]?.[0] === 'white'}}
+                                    onClick={() => handleUpVoteRequested(item.event_id, username, index)}
+                                    >
+                                    <Typography>{btnVoteRequested[index]?.[1]}</Typography>
                                 </Button>
                             </div>
                         </div>
