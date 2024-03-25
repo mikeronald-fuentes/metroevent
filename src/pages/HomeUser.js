@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const HomeUser = () => {
     const [eventsDetails, setEventsDetails] = useState([]);
+    const [eventsRegistration, setEventsRegistration] = useState([]);
     const [upVote, setUpVote] = useState('');
     const [btnVote, setBtnVote] = useState([]);
     const [btnVoteRequested, setBtnVoteRequested] = useState([]);
@@ -113,8 +114,7 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
-            setUpVote(data);
-            console.log(data);
+            setEventsRegistration(data);
             const initialState = data.map(item => {
                 if (item.has_upvoted === 1) {
                     return ['red', 'Upvoted'];
@@ -188,6 +188,10 @@ const HomeUser = () => {
             fetchingStyle();
             if(data.message){
                 toast.success(data.message);
+                fetch('http://localhost:3000/checkregistered')
+                        .then(res => res.json())
+                        .then(data => setEventsRegistration(data))
+                        .catch(err => console.error(err));
             }else if(data.error){
                 toast.error(data.error);
             }
@@ -493,6 +497,7 @@ const HomeUser = () => {
                             >
                                 <Typography>{btnRegister[index]?.[1] || 'Register'}</Typography>
                             </Button>
+
                             </div>
                             <div>
                                 <Button variant="contained" 

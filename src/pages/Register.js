@@ -1,4 +1,5 @@
 import "./registerStyles.css";
+import "./LoginStyles.css";
 import { useState } from "react";
 import { Typography, TextField, Button } from "@mui/material";
 import logo from '../images/logo.png';
@@ -74,11 +75,9 @@ const Register = () => {
     return(
         <div className='registerScreen'>
             <div className="blue">
-                <div className="left">
-                    <img src={logo} alt="Logo" className="image" />
-                    <Typography variant="h4" className="reg">Register Now</Typography>
-                    <Typography variant="body1" className="text">Enter your credentials to create your account</Typography>
-                </div>
+                <img src={logo} alt="Logo" className="logo" />
+                <Typography variant="h4" className="tag">Log in to your account</Typography>
+                <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
             </div>
             <ToastContainer position="top-right" />
             <div className='right'>

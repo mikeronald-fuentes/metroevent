@@ -1,12 +1,13 @@
-.container {
+.contained {
   display: flex;
   height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 .white {
   flex: 1;
   background-color: #ffffff;
-  width: 50%;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -25,8 +26,8 @@
 }
 
 .logo {
-  width: 50%;
-  height: 50%;
+  width: 40%;
+  height: 40%;
   position: absolute;
   top: 20%;
 }
@@ -61,7 +62,6 @@
   top: 10%;
   right: 5%;
 }
-
 
 .tag4,
 .usernametag,
