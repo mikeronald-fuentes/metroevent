@@ -1,13 +1,14 @@
 import "./registerStyles.css";
 import "./LoginStyles.css";
+import 'react-toastify/dist/ReactToastify.css';
 import { useState } from "react";
 import { Typography, TextField, Button } from "@mui/material";
-import logo from '../images/logo.png';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import UserProfile from './UserProfile';
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import logo from '../images/logo.png';
+import UserProfile from './UserProfile';
+
 const Register = () => {
     const navigate = useNavigate();
 
@@ -33,8 +34,6 @@ const Register = () => {
             return;
         }
 
-        console.log(formData.firstName);
-        console.log(formData.lastName);
         fetch('http://localhost:3000/registeraccount', {
             method: 'POST',
             headers: {
@@ -44,7 +43,6 @@ const Register = () => {
         })
         .then(res => res.json())
         .then(data => {
-            console.log(data); 
             if (data.message) {
                 toast.success(data.message);
                 setTimeout(() => {
@@ -59,7 +57,6 @@ const Register = () => {
                 toast.success('Logging in');
                 }, 1000);
                 setTimeout(() => {
-                    
                     navigate('/homeuser');
                 }, 2000);
             } else if (data.error) {
@@ -101,7 +98,6 @@ const Register = () => {
                     <Typography variant="body1">Already have an account? <Link to="/login"><span style={{color: 'blue'}}>Log in</span></Link></Typography>
                     </div>
                 </div>
-                
             </div>
         </div>
     );
