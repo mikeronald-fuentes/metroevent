@@ -46,7 +46,7 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className="contained">
       <div className="blue">
         <img src={logo} alt="Logo" className="logo" />
         <Typography variant="h4" className="tag">Log in to your account</Typography>
@@ -80,7 +80,6 @@ function Login() {
         {message && <div>{message}</div>}
       </div>
     </div>
-
   );
 }
 

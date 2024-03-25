@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const HomeUser = () => {
     const [eventsDetails, setEventsDetails] = useState([]);
+    const [eventsRegistration, setEventsRegistration] = useState([]);
     const [upVote, setUpVote] = useState('');
     const [btnVote, setBtnVote] = useState([]);
     const [checkBtnRegister, setCheckBtnRegister] = useState([]);
@@ -32,7 +33,7 @@ const HomeUser = () => {
             
     }, []);
     
-    // para sa initial color of the register button
+    // para sa initial color of the upvote button
     useEffect(() => {
         fetch('http://localhost:3000/checkupvote', {
             method: 'POST',
@@ -67,21 +68,20 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
-            setUpVote(data);
-            console.log(data);
+            setEventsRegistration(data);
             const initialState = data.map(item => {
-                if (item.is_registered === 0) {
-                    return ['blue', 'Register', false];
-                } else if (item.is_registered === 1 && item.is_accepted === 0) {
+                if (item.is_accepted === 0) {
                     return ['grey', 'Requested', true];
-                } else if (item.is_registered === 1 && item.is_accepted === 1) {
+                } else if (item.is_accepted === 1) {
                     return ['grey', 'Registered', true];
+                } else {
+                    return ['blue', 'Register', false];
                 }
             });
             setBtnRegister(initialState);
         })
         .catch(err => console.error(err));
-    }, [eventsDetails, username]);
+    }, [eventsRegistration, username]);    
 
     // upgrade account
     const handleUpgradeAccount = (username, type) => {
@@ -125,6 +125,10 @@ const HomeUser = () => {
             console.log(data);
             if(data.message){
                 toast.success(data.message);
+                fetch('http://localhost:3000/checkregistered')
+                        .then(res => res.json())
+                        .then(data => setEventsRegistration(data))
+                        .catch(err => console.error(err));
             }else if(data.error){
                 toast.error(data.error);
             }
@@ -143,18 +147,13 @@ const HomeUser = () => {
             })
             .then(res => res.json())
             .then(data => {
-                const { message, newCount } = data;
-                console.log(message);
-                console.log(newCount);
                 setBtnVote(prevBtnVote => {
                     const updatedBtnVote = [...prevBtnVote];
                     updatedBtnVote[index] = ['green', 'Up Vote']; 
                     return updatedBtnVote;
                 });
-                
                 if (data.message) {
                     toast.success(data.message);
-                    // Fetch updated event details after upvote action
                     fetch('http://localhost:3000/userhome')
                         .then(res => res.json())
                         .then(data => setEventsDetails(data))
@@ -348,6 +347,7 @@ const HomeUser = () => {
                             >
                                 <Typography>{btnRegister[index]?.[1] || 'Register'}</Typography>
                             </Button>
+
                             </div>
                             <div>
                                 <Button variant="contained" 

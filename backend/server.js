@@ -456,7 +456,6 @@ app.get('/checkregistration', (req, res) => {
         
         // Construct response array indicating if the user is registered and if the registration is accepted for each event
         const result = data.map(event => ({
-            event_id: event.event_id, // 1 if registered, 0 if not registered
             is_accepted: event.is_accepted
         }));
         
