@@ -353,9 +353,6 @@ app.get('/events/attended/:username', (req, res) => {
     });
 });
 
-
-
-
 app.get('/users', (req, res) => {
     const sql = "SELECT * FROM user_info";
     db.query(sql, (err, data) => {
@@ -368,28 +365,28 @@ app.get('/users', (req, res) => {
     });
 });
 
-//fetch joinable events
+//fetch user joinable events
 app.post('/joinevents', (req, res) => {
     const { username } = req.body;
 
     const sql = `
-    SELECT 
-        ei.*, 
-        COUNT(eu.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id 
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
-    WHERE 
-        eur.username IS NULL
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-        event_vote_count DESC
+        SELECT 
+            ei.*, 
+            COUNT(eu.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id 
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
+        WHERE 
+            eur.username IS NULL
+            AND ei.event_date >= CURDATE()  
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) 
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            event_vote_count DESC
     `;
 
     db.query(sql, [username], (err, data) => {
@@ -402,28 +399,28 @@ app.post('/joinevents', (req, res) => {
     });
 });
 
-// fetch requested events
+// fetch user requested events
 app.post('/requestedevents', (req, res) => {
     const { username } = req.body;
 
     const sql = `
-    SELECT 
-        ei.*, 
-        COUNT(eu.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
-    WHERE 
-        eur.username IS NOT NULL
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-    event_vote_count DESC;
+        SELECT 
+            ei.*, 
+            COUNT(eu.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
+        WHERE 
+            eur.username IS NOT NULL
+            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+        event_vote_count DESC;
     `;
 
     db.query(sql, [username], (err, data) => {
@@ -436,28 +433,28 @@ app.post('/requestedevents', (req, res) => {
     });
 });
 
-// fetch registered events
+// fetch user registered events
 app.post('/registeredevents', (req, res) => {
     const { username } = req.body;
 
     const sql = `
-    SELECT 
-        ei.*, 
-        COUNT(eu.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
-    WHERE 
-        eur.username IS NOT NULL
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-    event_vote_count DESC;
+        SELECT 
+            ei.*, 
+            COUNT(eu.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
+        WHERE 
+            eur.username IS NOT NULL
+            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+        event_vote_count DESC;
     `;
 
     db.query(sql, [username], (err, data) => {
@@ -470,22 +467,23 @@ app.post('/registeredevents', (req, res) => {
     });
 });
 
-// past events
+// fetch past events
 app.get('/pastevents', (req, res) => {
     const sql = `
-    SELECT 
-        ei.*, 
-        COUNT(eu.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id
-    WHERE 
-        ei.event_date < NOW() OR (ei.event_date = NOW() AND ei.event_time < CURRENT_TIME())
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-        event_vote_count DESC;`;  
+        SELECT 
+            ei.*, 
+            COUNT(eu.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id
+        WHERE 
+            ei.event_date < NOW() OR (ei.event_date = NOW() AND ei.event_time < CURRENT_TIME())
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            event_vote_count DESC
+    `;  
             
     db.query(sql, (err, data) => {
         if (err) {
@@ -497,31 +495,31 @@ app.get('/pastevents', (req, res) => {
     });
 });
 
-// para sa vote button green bg
+// fetch para sa joinable events vote button style 
 app.post('/checkjoinupvote', (req, res) => {
     const { username } = req.body;
 
-    // Query the event_upvote table to check if the user has upvoted each event
     const sql = `
-    SELECT 
-        ei.event_id,
-        IFNULL(eu.username, '') AS voted_by_user,
-        COUNT(eu.username) AS upvote_count,
-        COUNT(eur.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
-    WHERE 
-        (eur.username IS NULL)
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-        event_vote_count DESC;`;
+        SELECT 
+            ei.event_id,
+            IFNULL(eu.username, '') AS voted_by_user,
+            COUNT(eu.username) AS upvote_count,
+            COUNT(eur.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
+        WHERE 
+            (eur.username IS NULL)
+            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            event_vote_count DESC;
+    `;
 
     db.query(sql, [username, username], (err, data) => {
         if (err) {
@@ -530,47 +528,42 @@ app.post('/checkjoinupvote', (req, res) => {
             return;
         }
         
-        // Construct response array indicating if the user has upvoted each event
         const result = data.map(event => ({
             event_id: event.event_id,
             has_upvoted: event.voted_by_user ? 1 : 0,
             upvote_count: event.upvote_count
         }));
-        console.log(result);
-        // Order the results by the number of upvotes (in descending order)
-        result.sort((a, b) => b.upvote_count - a.upvote_count);
 
-        // Filter out any values of has_upvoted that are not 0 or 1
+        result.sort((a, b) => b.upvote_count - a.upvote_count);
         const filteredResult = result.filter(event => event.has_upvoted === 0 || event.has_upvoted === 1);
-        
         res.json(filteredResult);
     });
 });
 
+// fetch para sa requested events vote button style 
 app.post('/checkrequestedupvote', (req, res) => {
     const { username } = req.body;
 
-    // Query the event_upvote table to check if the user has upvoted each event
     const sql = `
-    SELECT 
-        ei.event_id,
-        IFNULL(eu.username, '') AS voted_by_user,
-        COUNT(eu.username) AS upvote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
-    WHERE 
-        (eur.username IS NOT NULL)
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-        upvote_count DESC
-        `;
+        SELECT 
+            ei.event_id,
+            IFNULL(eu.username, '') AS voted_by_user,
+            COUNT(eu.username) AS upvote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
+        WHERE 
+            (eur.username IS NOT NULL)
+            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            upvote_count DESC
+    `;
 
     db.query(sql, [username, username], (err, data) => {
         if (err) {
@@ -579,48 +572,43 @@ app.post('/checkrequestedupvote', (req, res) => {
             return;
         }
         
-        // Construct response array indicating if the user has upvoted each event
         const result = data.map(event => ({
             event_id: event.event_id,
             has_upvoted: event.voted_by_user ? 1 : 0,
             upvote_count: event.upvote_count
         }));
-        console.log(result);
-        // Order the results by the number of upvotes (in descending order)
-        result.sort((a, b) => b.upvote_count - a.upvote_count);
 
-        // Filter out any values of has_upvoted that are not 0 or 1
+        result.sort((a, b) => b.upvote_count - a.upvote_count);
         const filteredResult = result.filter(event => event.has_upvoted === 0 || event.has_upvoted === 1);
-        
         res.json(filteredResult);
     });
 });
 
+// fetch para sa registered events vote button style 
 app.post('/checkregisteredupvote', (req, res) => {
     const { username } = req.body;
 
-    // Query the event_upvote table to check if the user has upvoted each event
     const sql = `
-    SELECT 
-        ei.event_id,
-        IFNULL(eu.username, '') AS voted_by_user,
-        COUNT(eu.username) AS upvote_count,
-        COUNT(eur.event_id) AS event_vote_count
-    FROM 
-        event_info ei 
-    LEFT JOIN 
-        event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
-    LEFT JOIN
-        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
-    WHERE 
-        (eur.username IS NOT NULL)
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-    GROUP BY 
-        ei.event_id
-    ORDER BY 
-        event_vote_count DESC
-        `;
+        SELECT 
+            ei.event_id,
+            IFNULL(eu.username, '') AS voted_by_user,
+            COUNT(eu.username) AS upvote_count,
+            COUNT(eur.event_id) AS event_vote_count
+        FROM 
+            event_info ei 
+        LEFT JOIN 
+            event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
+        LEFT JOIN
+            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
+        WHERE 
+            (eur.username IS NOT NULL)
+            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        GROUP BY 
+            ei.event_id
+        ORDER BY 
+            event_vote_count DESC
+    `;
 
     db.query(sql, [username, username], (err, data) => {
         if (err) {
@@ -629,52 +617,19 @@ app.post('/checkregisteredupvote', (req, res) => {
             return;
         }
         
-        // Construct response array indicating if the user has upvoted each event
         const result = data.map(event => ({
             event_id: event.event_id,
             has_upvoted: event.voted_by_user ? 1 : 0,
             upvote_count: event.upvote_count
         }));
-        console.log(result);
-        // Order the results by the number of upvotes (in descending order)
-        result.sort((a, b) => b.upvote_count - a.upvote_count);
 
-        // Filter out any values of has_upvoted that are not 0 or 1
+        result.sort((a, b) => b.upvote_count - a.upvote_count);
         const filteredResult = result.filter(event => event.has_upvoted === 0 || event.has_upvoted === 1);
-        
         res.json(filteredResult);
     });
 });
-// para sa color sa btnRegister
-app.get('/checkregistration', (req, res) => {
-    const { username } = req.body;
 
-    // Query to check if the user is registered for each event and if the registration is accepted
-    const sql = `
-        SELECT 
-            event_id,
-            is_accepted
-        FROM 
-            event_user_request where username = ?
-        `;
-    
-    db.query(sql, [username], (err, data) => {
-        if (err) {
-            console.error('Error executing query: ', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
-        }
-        
-        // Construct response array indicating if the user is registered and if the registration is accepted for each event
-        const result = data.map(event => ({
-            is_accepted: event.is_accepted
-        }));
-        
-        res.json(result);
-    });
-});
-
-// para sa green bg upvote
+// increment on event up vote count
 app.post('/addupvote', (req, res) => {
     const { eventid, username } = req.body;
 
@@ -686,11 +641,10 @@ app.post('/addupvote', (req, res) => {
             return;
         }
         res.status(200).json({ message: 'Successfully up voted event.' });
-        
     });
 });
 
-// para sa red bg upvoted
+// decrement on event up vote count
 app.post('/removeupvote', (req, res) => {
     const { eventid, username } = req.body;
 
@@ -708,7 +662,7 @@ app.post('/removeupvote', (req, res) => {
 });
 
 
-// para sa buttons be organizer og be admin 
+// insert user and its account upgrade request on table admin_list for approval
 app.post('/upgradeaccount', (req, res) => {
     const { username, type } = req.body;
 
@@ -737,7 +691,7 @@ app.post('/upgradeaccount', (req, res) => {
     });
 });
 
-//para sa register event nya insert sa db
+//insert the username and eventid on event_user_request table for approval to register on an event
 app.post('/registerevent', (req, res) => {
     const { username, eventid } = req.body;
 
@@ -766,10 +720,11 @@ app.post('/registerevent', (req, res) => {
     });
 });
 
+// para register sa account
 app.post('/registeraccount', (req, res) => {
     const { username, firstName, lastName, password } = req.body;
     console.log(username);
-    // Check if the user has already made a request for this event
+
     const findUsername = `SELECT * FROM user_info WHERE username = ?`;
     db.query(findUsername, [username], (err, rows) => {
         if (err) {
@@ -778,13 +733,11 @@ app.post('/registeraccount', (req, res) => {
             return;
         }
 
-        // If the user has already made a request, return an error
         if (rows.length > 0) {
             res.status(400).json({ error: 'Username already exist' });
             return;
         }
         
-        // If the user hasn't made a request, insert a new request
         const insertRequest = `INSERT INTO user_info (username, user_type, first_name, last_name, password) VALUES (?, 0, ?, ?, ?)`;
         db.query(insertRequest, [username, firstName, lastName, password], (err, result) => {
             if (err) {
