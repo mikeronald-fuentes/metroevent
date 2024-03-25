@@ -69,12 +69,16 @@ const Register = () => {
         });
     };
 
+    const handleLoginClick = (event) => {
+        navigate('/login')
+    }
+
     return(
         <div className='registerScreen'>
             <div className="blue">
                 <img src={logo} alt="Logo" className="logo" />
-                <Typography variant="h4" className="tag">Log in to your account</Typography>
-                <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
+                <Typography variant="h4" className="tag">Create your account</Typography>
+                <Typography variant="body1" className="tag2">Enter your credentials to create your account</Typography>
             </div>
             <ToastContainer position="top-right" />
             <div className='right'>
@@ -93,9 +97,13 @@ const Register = () => {
                     <Typography variant="body1" className="passtag">Confirm your Password</Typography>
                     <TextField variant="outlined" placeholder="Re-enter your password" className="inputConfirmPassword" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} />
                     <br />
-                    <Button variant="contained" className="loginbutton" onClick={handleRegister}><Typography>Register</Typography></Button>
+                    <Button variant="contained" className="registerbutton" onClick={handleRegister}>
+                        <Typography>Register</Typography>
+                    </Button>
                     <div style={{marginTop: '20px'}}>
-                    <Typography variant="body1">Already have an account? <Link to="/login"><span style={{color: 'blue'}}>Log in</span></Link></Typography>
+                    <Typography variant="body1">Already have an account? 
+                        <Button variant='outline' onClick={handleLoginClick}>Login</Button>
+                    </Typography>
                     </div>
                 </div>
             </div>
