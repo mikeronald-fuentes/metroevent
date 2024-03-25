@@ -3,7 +3,6 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: center;
   }
   
   .header{
@@ -63,27 +62,37 @@
   }
   
   .joinEvents{
-    width: 100%;
+    width: 97%;
     height: auto;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    background-color: #e3f4fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 100px;
   }
   
   .txtUpcomming{
     font-size: 32px;
     font-family: Roboto;
     font-weight: 900;
+    padding-left: 30px;
+    margin-top: 10px;
   }
   
   .eventCards{
     width: 325px;
     height: 300px;
-    box-shadow: 2px 0px 10px rgba(3,3,3,0.1);
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     margin-right: 30px;
     padding: 15px;
-    
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
   }
   
   .eventName{
@@ -111,6 +120,7 @@
     flex-wrap: wrap;
     justify-content: flex-start;
     padding-left: 30px;
+    
   }
   
   .btnCheck button{
@@ -148,55 +158,37 @@
     background-color: green;
   }
 
-  .notification-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
+  .notificationCard{
+      padding: 10px;
+      padding-right: 50px;
+      margin-left: 15px;
+      margin-right: 15px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      margin-bottom: 20px;
+  }
+
+  .notificationContainer{
+    width: 100%;
+    height: auto;
+    margin-top: 10px;
+    margin-right: 50px;
+    margin-bottom: 20px;
+    display: flex; 
+    flex-direction: column;
+    border: 1px solid #ccc;
+    background-color: #e3f4fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .containerEvents{
+    width: 75% ;
+    padding-left: 50px; 
+    padding-top: 10px;
   }
   
-  /* Notification Container Style */
-  .notification-container {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    display: none; /* Initially hidden */
-    z-index: 998;
-  }
-  
-  /* Notification Item Style */
-  .notification-item {
-    padding: 10px;
-    background-color: #fff;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Notification Item Title Style */
-  .notification-title {
-    font-weight: bold;
-  }
-  
-  /* Notification Item Content Style */
-  .notification-content {
-    margin-top: 5px;
-  }

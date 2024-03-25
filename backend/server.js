@@ -557,12 +557,12 @@ app.post('/checkrequestedupvote', (req, res) => {
             event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
         WHERE 
             (eur.username IS NOT NULL)
-            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+            AND ei.event_date >= CURDATE()  
+            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) 
         GROUP BY 
             ei.event_id
         ORDER BY 
-            upvote_count DESC
+            upvote_count DESC;
     `;
 
     db.query(sql, [username, username], (err, data) => {
@@ -753,11 +753,10 @@ app.post('/registeraccount', (req, res) => {
 app.post('/notifications', (req, res) => {
     const { username } = req.body;
 
-    // Query the user_notification table to fetch notifications for the given username
-    const sql = `
-        SELECT 
+    const sql = 
+        `SELECT 
             nc.notification_type,
-            un.notification_info
+            un.notification_info 
         FROM 
             user_notification un
         INNER JOIN 
@@ -772,11 +771,11 @@ app.post('/notifications', (req, res) => {
             return;
         }
         const result = data.map(event => ({
-            notification: event.notification_type, // 1 if registered, 0 if not registered
+            notification: event.notification_type, 
             text: event.notification_info
         }));
-        // Send the notifications data as the response
-        res.json(data);
+        
+        res.json(result);
     });
 });
 

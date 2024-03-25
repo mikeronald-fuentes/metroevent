@@ -2,7 +2,7 @@ import './homeUserStyles.css';
 import { useState, useEffect } from "react";
 import { Typography, Button } from "@mui/material";
 import UserProfile from './UserProfile';
-import { useAuth } from '../Hooks/Authorization'; 
+import { AuthProvider, useAuth } from '../Hooks/Authorization'; 
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,10 +15,9 @@ const HomeUser = () => {
     const [requestedEvents, setRequestedEvents] = useState([]);
     const [registeredEvents, setRegisteredEvents] = useState([]);
     const [pastevents, setPastEvents] = useState([]);
-    const [btnRegister, setBtnRegister] = useState([]);
     const [username, setUsername] = useState([]);
-    const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [height, setHeight] = useState([]);
     const { logout } = useAuth(); 
     const navigate = useNavigate();
 
@@ -29,7 +28,8 @@ const HomeUser = () => {
             return;
         }
         fetchingData();
-        fetchingStyle();
+        fetchingStyle(); 
+        fetchNotifications(username);
     }, [username]);
 
     // re render event data when register or vote button is clicked
@@ -313,13 +313,9 @@ const HomeUser = () => {
         }
     };
     
-    useEffect(() => {
-        // Fetch user's notifications when the component mounts
-        fetchNotifications(username);
-    }, []);
 
+    // fetch notifications of user
     const fetchNotifications = (username) => {
-        // Fetch user's notifications from the backend
         fetch('http://localhost:3000/notifications', {
             method: 'POST',
             headers: {
@@ -394,7 +390,9 @@ const HomeUser = () => {
                     <Typography>Be an admin</Typography>
                 </Button>
             </div>
-            <div style={{width: '75%', paddingLeft: '50px'}}>
+            
+            <div className='containerEvents'>
+            {eventsDetails.length > 0 && (
             <div className='joinEvents'>
                 <div className='txtUpcomming'>Join Event</div>
                 <div className='cards'>
@@ -437,7 +435,8 @@ const HomeUser = () => {
                     </div>
                     ))}
                 </div>
-            </div>
+            </div>)}
+            {registeredEvents.length > 0 && (
             <div className='joinEvents'>
                 <div className='txtUpcomming'>Registered Events</div>
                 <div className='cards'>
@@ -472,7 +471,8 @@ const HomeUser = () => {
                     </div>
                     ))}
                 </div>
-            </div>
+            </div>)}
+            {requestedEvents.length > 0 && (
             <div className='joinEvents'>
                 <div className='txtUpcomming'>Requested Events</div>
                 <div className='cards'>
@@ -505,7 +505,8 @@ const HomeUser = () => {
                     </div>
                     ))}
                 </div>
-            </div>
+            </div>)}
+            {pastevents.length > 0 && (
             <div className='joinEvents'>
                 <div className='txtUpcomming'>Past Events</div>
                 <div className='cards'>
@@ -527,11 +528,22 @@ const HomeUser = () => {
                     </div>
                     ))}
                 </div>
-            </div>
+            </div>)}
         </div>
-        <div style={{width: '20%'}}>
-            omcm
-        </div>
+        {notifications.length > 0 && (
+            <div style={{width: '21%'}}>
+                <div className='notificationContainer'>
+                    <div style={{marginTop: '10px', paddingLeft: '20px'}}><h2>Notifications</h2></div>
+                    <div style={{overflowX: 'auto'}}>
+                    {Array.isArray(notifications) && notifications.map((item, index)=> (
+                        <div className='notificationCard'>
+                            <div><h6>{item.notification}</h6></div>
+                            <div>Message: {item.text}</div>
+                        </div>
+                    ))}
+                    </div>
+                </div>
+            </div>)}
         </div>
     );
 };
