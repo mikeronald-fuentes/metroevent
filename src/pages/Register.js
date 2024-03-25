@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserProfile from './UserProfile';
 import { useNavigate } from "react-router-dom";
-
+import { Link } from 'react-router-dom';
 const Register = () => {
     const navigate = useNavigate();
 
@@ -74,9 +74,11 @@ const Register = () => {
     return(
         <div className='registerScreen'>
             <div className="blue">
-                <img src={logo} alt="Logo" className="logo" />
-                <Typography variant="h4" className="tag">Register Now</Typography>
-                <Typography variant="body1" className="tag2">Enter your credentials to create your account</Typography>
+                <div className="left">
+                    <img src={logo} alt="Logo" className="image" />
+                    <Typography variant="h4" className="reg">Register Now</Typography>
+                    <Typography variant="body1" className="text">Enter your credentials to create your account</Typography>
+                </div>
             </div>
             <ToastContainer position="top-right" />
             <div className='right'>
@@ -96,7 +98,11 @@ const Register = () => {
                     <TextField variant="outlined" placeholder="Re-enter your password" className="inputConfirmPassword" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} />
                     <br />
                     <Button variant="contained" className="loginbutton" onClick={handleRegister}><Typography>Register</Typography></Button>
+                    <div style={{marginTop: '20px'}}>
+                    <Typography variant="body1">Already have an account? <Link to="/login"><span style={{color: 'blue'}}>Log in</span></Link></Typography>
+                    </div>
                 </div>
+                
             </div>
         </div>
     );
