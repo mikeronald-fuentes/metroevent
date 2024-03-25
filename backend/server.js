@@ -371,17 +371,46 @@ app.get('/users', (req, res) => {
 //fetch tanan events info
 app.get('/userhome', (req, res) => {
     const sql = `
-        SELECT 
-            ei.*, 
-            COUNT(eu.event_id) AS event_vote_count
-        FROM 
-            event_info ei 
-        LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id
-        GROUP BY 
-            ei.event_id
-        ORDER BY 
-            event_vote_count DESC`;  
+    SELECT 
+        ei.*, 
+        COUNT(eu.event_id) AS event_vote_count
+    FROM 
+        event_info ei 
+    LEFT JOIN 
+        event_upvote eu ON ei.event_id = eu.event_id
+    WHERE 
+        ei.event_date > NOW() OR (ei.event_date = NOW() AND ei.event_time > CURRENT_TIME())
+    GROUP BY 
+        ei.event_id
+    ORDER BY 
+        event_vote_count DESC;
+    `;  
+            
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.json(data);
+    });
+});
+// past events
+app.get('/pastevents', (req, res) => {
+    const sql = `
+    SELECT 
+        ei.*, 
+        COUNT(eu.event_id) AS event_vote_count
+    FROM 
+        event_info ei 
+    LEFT JOIN 
+        event_upvote eu ON ei.event_id = eu.event_id
+    WHERE 
+        ei.event_date < NOW() OR (ei.event_date = NOW() AND ei.event_time < CURRENT_TIME())
+    GROUP BY 
+        ei.event_id
+    ORDER BY 
+        event_vote_count DESC;`;  
             
     db.query(sql, (err, data) => {
         if (err) {

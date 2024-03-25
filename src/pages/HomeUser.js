@@ -12,6 +12,7 @@ const HomeUser = () => {
     const [upVote, setUpVote] = useState('');
     const [btnVote, setBtnVote] = useState([]);
     const [checkBtnRegister, setCheckBtnRegister] = useState([]);
+    const [pastevents, setPastEvents] = useState([]);
     const [btnRegister, setBtnRegister] = useState([]);
     const [username, setUsername] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -29,7 +30,10 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => setEventsDetails(data))
             .catch(err => console.error(err));
-            
+        fetch('http://localhost:3000/pastevents')
+            .then(res => res.json())
+            .then(data => setPastEvents(data))
+            .catch(err => console.error(err));
     }, []);
     
     // para sa initial color of the register button
@@ -199,7 +203,6 @@ const HomeUser = () => {
         }
     };
     
-
     useEffect(() => {
         // Fetch user's notifications when the component mounts
         fetchNotifications(username);
@@ -353,7 +356,7 @@ const HomeUser = () => {
                                 <Button variant="contained" 
                                     className="btnAdmin"
                                     style={{backgroundColor: btnVote[index]?.[0] === 'red' ? 'red' : 'green',
-                                        color: btnVote[index]?.[0] === 'red' ? 'white' : 'black'}}
+                                        color: btnVote[index]?.[0] === 'white'}}
                                     onClick={() => handleUpVote(item.event_id, username, index)}
                                     >
                                     <Typography>{btnVote[index]?.[1]}</Typography>
@@ -361,6 +364,46 @@ const HomeUser = () => {
                             </div>
                         </div>
                     </div>
+                    ))}
+                </div>
+            </div>
+            <div className='joinEvents'>
+                <div className='txtUpcomming'>Past Events</div>
+                <div className='cards'>
+                {pastevents.map((item, index)=> (
+                    <div key={index} index={index} className='eventCards' >
+                        <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
+                            <div style={{width:'100%', display: 'flex'}}>
+                                <div className='eventName'>
+                                    {item.event_name}
+                                </div>
+                                <div className='count'>
+                                <span class="icon">&#x21e7;</span>{item.event_vote_count}
+                                </div>
+                            </div>
+                        <div className='organizer'>
+                            <i>by {item.event_organizer}</i>
+                        </div>
+                        <div className='description'>
+                           <span>Description: </span> {item.event_description}
+                        </div>
+                        <div className='type'>
+                            <span>Type: </span> {item.event_type}
+                        </div>
+                        <div className='limit'>
+                           <span>People Limit: </span> {item.event_participants_limit}
+                        </div>
+                        <div className='location'>
+                            <span>Location: </span> {item.event_location}
+                        </div>
+                        <div className='date'>
+                            <span>Date: </span> {handleDate(item.event_date)}
+                        </div>
+                        <div className='time' >
+                            <span>Time: </span>{handleTime(item.event_time)}
+                        </div>
+                        </div>
+                        </div>
                     ))}
                 </div>
             </div>
