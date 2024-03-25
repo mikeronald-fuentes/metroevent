@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
   
   .right{
@@ -45,4 +46,18 @@
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
+  }
+
+  .reg {
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+    padding-top: 10px;
+  }
+  
+  .text {
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+    
   }
