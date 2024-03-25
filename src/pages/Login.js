@@ -45,6 +45,10 @@ function Login() {
     setPassword(event.target.value);
   };
 
+  const handleRegisterClick = (event) => {
+    navigate('/register');
+  };
+
   return (
     <div className="contained">
       <div className="blue">
@@ -78,7 +82,10 @@ function Login() {
           <Typography>Log in</Typography>
         </Button>
         {message && <div>{message}</div>}
+        <br></br>
+        <Typography> No Account? <Button variant='outline' onClick={handleRegisterClick}>Register</Button> </Typography>
       </div>
+      
     </div>
   );
 }
