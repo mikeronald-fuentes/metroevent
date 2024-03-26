@@ -383,6 +383,8 @@ const HomeUser = () => {
             </div> 
             <ToastContainer position="top-right" />
             <div className='btnBeOrganizer'>
+                <div style={{width: 'auto', marginRight: 'auto', color: 'black', paddingLeft: '50px'}}><h3>Welcome, <span style={{color: '#4c908a', fontWeight: '700'}}>{username} &#128513;</span></h3></div>
+
                 <Button variant="contained" className="btnOrganizer" onClick={() => handleUpgradeAccount(username, 0)}>
                     <Typography>Be an organizer</Typography>
                 </Button>
