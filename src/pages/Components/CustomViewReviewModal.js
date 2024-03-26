@@ -10,8 +10,6 @@ function ViewReview({ eventId, onClose }) {
             axios.get(`http://localhost:3000/viewreviews?eventId=${eventId}`)
                 .then(response => {
                     setReviews(response.data);
-                    console.log(reviews);
-                    console.log(eventId);
                 })
                 .catch(error => {
                     console.error('Error fetching reviews:', error);
@@ -23,7 +21,6 @@ function ViewReview({ eventId, onClose }) {
         return null; // Return null if eventId is not defined
     }
 
-    
     return (
         <div style={{
             position: 'fixed',
@@ -47,17 +44,25 @@ function ViewReview({ eventId, onClose }) {
                 overflowY: 'auto'
             }}>
                 <Typography variant="h5" gutterBottom>Reviews</Typography>
-                {reviews.map((review, index) => (
-                    <Card key={index} style={{ marginBottom: '10px' }}>
+                {reviews.length > 0 ? (
+                    reviews.map((review, index) => (
+                        <Card key={index} style={{ marginBottom: '10px' }}>
+                            <CardContent>
+                                <Typography variant="body2"><h4>{review.event_review}</h4></Typography>
+                                <Typography variant="body1"> 
+                                    <h6><i>review by {review.username}</i></h6>
+                                </Typography>
+                                <br />
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : (
+                    <Card style={{ marginBottom: '10px' }}>
                         <CardContent>
-                            <Typography variant="body2"><h4>{review.event_review}</h4></Typography>
-                            <Typography variant="body1"> 
-                                <h6><i>review by {review.username}</i></h6>
-                            </Typography>
-                            <br></br>
+                            <Typography variant="body1">No Reviews</Typography>
                         </CardContent>
                     </Card>
-                ))}
+                )}
                 <Button variant="contained" onClick={onClose}>Close</Button>
             </div>
         </div>
