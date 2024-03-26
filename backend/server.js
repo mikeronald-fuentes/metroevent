@@ -353,7 +353,30 @@ app.get('/events/attended/:username', (req, res) => {
     });
 });
 
-app.get('/users', (req, res) => {
+app.post('/addreview', (req, res) => {
+    const { username, eventId, review } = req.body;
+
+    const sql = `
+        INSERT INTO event_user_review
+        (event_id, username, event_review)
+        VALUES (?, ?, ?)`;
+
+    db.query(sql, [eventId, username, review], (err, reviewData) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.json({ message: 'Review added successfully' });
+    });
+});
+
+app.post('/reviews', (req, res) => {
+    const { eventId, username } = req.body;
+    
+})
+
+app.post('/users', (req, res) => {
     const sql = "SELECT * FROM user_info";
     db.query(sql, (err, data) => {
         if (err) {

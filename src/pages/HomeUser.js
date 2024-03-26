@@ -525,12 +525,12 @@ const HomeUser = () => {
                             <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
                             <div className='time' ><span>Time: </span>{handleTime(item.event_time)}</div>
                             <br></br>
-                            <Typography>
-                                <Button variant='contained'>
-                                    Review Event
-                                </Button>
-                            </Typography>
                         </div>
+                        <Typography>
+                            <Button variant='contained'>
+                                Review Event
+                            </Button>
+                        </Typography>
                     </div>
                     ))}
                 </div>

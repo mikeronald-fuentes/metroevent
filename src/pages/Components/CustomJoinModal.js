@@ -69,13 +69,6 @@ function CustomJoinModal({ show, onHide, eventData, username, handleJoinEvent })
         }
     };
     
-
-    
-    
-    
-    
-    
-
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>
