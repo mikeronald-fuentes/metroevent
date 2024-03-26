@@ -361,20 +361,66 @@ app.post('/addreview', (req, res) => {
         (event_id, username, event_review)
         VALUES (?, ?, ?)`;
 
-    db.query(sql, [eventId, username, review], (err, reviewData) => {
+    db.query(sql, [eventId, username, review], (err, result) => {
         if (err) {
             console.error('Error executing query: ', err);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        res.json({ message: 'Review added successfully' });
+
+        if (result.affectedRows === 1) {
+            console.log('Review added successfully');
+            res.json({ success: true, message: 'Review added successfully' });
+        } else {
+            console.log('Failed to add review');
+            res.status(500).json({ success: false, error: 'Failed to add review' });
+        }
     });
 });
 
-app.post('/reviews', (req, res) => {
-    const { eventId, username } = req.body;
+app.get('/reviewedevents', async (req, res) => {
+    try {
+        const { username } = req.query;
+
+        const sql = `
+            SELECT * FROM event_user_review 
+            WHERE username = ?
+        `;
+        
+        db.query(sql, [username], (err, result) => {
+            if (err) {
+                console.error('Error fetching reviewed events:', err);
+                res.status(500).json({ error: 'An unexpected error occurred' });
+                return;
+            }
+
+            res.json(result);
+        });
+    } catch (error) {
+        console.error('Error fetching reviewed events:', error);
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+});
+
+
+app.get('/viewreviews', (req, res) => {
+    const { eventId } = req.query;
     
-})
+    const sql = `
+        SELECT username, event_review
+        FROM event_user_review 
+        WHERE event_id = ?
+    `;
+
+    db.query(sql, [eventId], (err, result) => {
+        if (err) {
+            console.error('Error fetching reviews:', err);
+            res.status(500).json({ error: 'An unexpected error occurred' });
+        } else {
+            res.json(result);
+        }
+    });
+});
 
 app.post('/users', (req, res) => {
     const sql = "SELECT * FROM user_info";
