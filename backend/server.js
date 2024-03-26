@@ -266,8 +266,8 @@ app.post('/addevent', (req, res) => {
 
             console.log('Event added successfully');
             const eventId = result.insertId;
-            const insertUpvoteSql = `INSERT INTO event_upvote (event_id, event_vote_count) VALUES (?, 0)`;
-            db.query(insertUpvoteSql, [eventId], (upvoteErr, upvoteResult) => {
+            const insertUpvoteSql = `INSERT INTO event_upvote (event_id, username) VALUES (?, ?)`;
+            db.query(insertUpvoteSql, [eventId,organizer], (upvoteErr, upvoteResult) => {
                 if (upvoteErr) {
                     console.error('Error adding event upvote:', upvoteErr);
                     res.status(500).json({ error: 'Internal Server Error' });
@@ -770,14 +770,15 @@ app.post('/notifications', (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        const result = data.map(event => ({
-            notification: event.notification_type, 
-            text: event.notification_info
+        const result = data.map(notification => ({
+            notification: notification.notification_type, 
+            text: notification.notification_info
         }));
         
         res.json(result);
     });
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -786,21 +787,39 @@ app.listen(PORT, () => {
 
 app.post('/events/join', (req, res) => {
     const { event_id, username } = req.body;
-    let sql = 'INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, ?)';
-
     const isAccepted = false;
 
-    db.query(sql, [event_id, username, isAccepted], (err, result) => {
+    // Insert the join request into the event_user_request table
+    let joinSql = 'INSERT INTO event_user_request (event_id, username, is_accepted) VALUES (?, ?, ?)';
+    db.query(joinSql, [event_id, username, isAccepted], async (err, result) => {
         if (err) {
             console.error('Error joining event:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Failed to join event' });
             return;
+        }
+
+        try {
+            // Fetch the organizer of the event
+            const organizerQuery = 'SELECT event_organizer FROM event_info WHERE event_id = ?';
+            const [organizerRow] = await db.promise().query(organizerQuery, [event_id]);
+            const organizer = organizerRow[0].event_organizer;
+
+            // Insert a notification for the organizer
+            const notificationQuery = 'INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?, ?, ?)';
+            await db.promise().query(notificationQuery, [organizer, 1, `User ${username} has requested to join your event`]);
+
+            console.log('Notification sent to organizer');
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            // Log the error and continue, as the main functionality (joining event) has already been completed
         }
 
         console.log('Event join request sent successfully');
         res.json({ message: 'Event join request sent successfully' });
     });
 });
+
+
 
 
 app.get('/events/hasRequested/:eventId', (req, res) => {
@@ -921,7 +940,37 @@ app.post('/events/cancel/:eventId', (req, res) => {
     });
 });
 
+app.post('/delete-notification', (req, res) => {
+    const { id } = req.body; // Assuming you send the ID of the notification to delete in the request body
+
+    // Find the index of the notification with the given ID
+    const index = notifications.findIndex(notification => notification.id === id);
+
+    // If the notification is found, remove it from the array
+    if (index !== -1) {
+        notifications.splice(index, 1);
+        res.status(200).json({ message: 'Notification deleted successfully' });
+    } else {
+        res.status(404).json({ message: 'Notification not found' });
+    }
+});
 
 
+app.post('/notifications/add', (req, res) => {
+    const { username, notification_category, notification_info } = req.body;
+
+    let sql = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?, ?, ?)`;
+
+    db.query(sql, [username, notification_category, notification_info], (err, result) => {
+        if (err) {
+            console.error('Error executing query: ', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        console.log('Notification added successfully');
+        res.status(200).json({ message: 'Notification added successfully' });
+    });
+});
 
 
