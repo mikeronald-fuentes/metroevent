@@ -61,6 +61,40 @@ function CustomJoinModal({ show, onHide, eventData, username, handleJoinEvent })
                 throw new Error('Failed to join event');
             }
     
+            // Add notification to user_notification table for the organizer
+            const responseNotificationOrganizer = await fetch('http://localhost:3000/notifications/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: eventData.event_organizer, // Organizer's username
+                    notification_category: 5, // Notification type for request to join event
+                    notification_info: `User ${username} has requested to join the event "${eventData.event_name}".`
+                }),
+            });
+    
+            if (!responseNotificationOrganizer.ok) {
+                throw new Error('Failed to add notification for the organizer');
+            }
+    
+            // Add notification to user_notification table for the user
+            const responseNotificationUser = await fetch('http://localhost:3000/notifications/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    notification_category: 5, // Notification type for request to join event
+                    notification_info: 'Your request to join the event has been sent. Please wait for confirmation.'
+                }),
+            });
+    
+            if (!responseNotificationUser.ok) {
+                throw new Error('Failed to add notification for the user');
+            }
+    
             alert('Event join request sent successfully');
             onHide(); // Close the modal after joining
         } catch (error) {
@@ -69,13 +103,6 @@ function CustomJoinModal({ show, onHide, eventData, username, handleJoinEvent })
         }
     };
     
-
-    
-    
-    
-    
-    
-
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>

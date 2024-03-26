@@ -21,6 +21,7 @@ function Login() {
         setMessage('Login successful');
         login(response.data);
         UserProfile.setUsername(username);
+        console.log(username);
         if (response.data.user_type === 0) {
           navigate('/homeuser');
         } else if (response.data.user_type === 1) {

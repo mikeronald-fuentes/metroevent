@@ -49,7 +49,7 @@ export default function CreateEvent() {
         } catch (error) {
             console.error('Error adding event:', error);
             if (error.response) {
-                // The request was made and the server responded with a status code
+                // The request was made and the server responded inth a status code
                 // that falls out of the range of 2xx
                 console.error('Server responded with status code:', error.response.status);
                 console.error('Response data:', error.response.data);
