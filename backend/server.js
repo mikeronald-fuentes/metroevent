@@ -942,66 +942,89 @@ app.post('/events/cancelRegistration', (req, res) => {
     }
 });
 
-app.post('/events/cancel/:eventId', (req, res) => {
-    const eventId = req.params.eventId;
+app.post('/events/cancel', (req, res) => {
+    const { eventId } = req.body;
 
-    // Perform deletion from event_attendees table
-    const deleteAttendeesSql = `DELETE FROM event_attendees WHERE event_id = ?`;
-    db.query(deleteAttendeesSql, eventId, (err, result) => {
+    const notificationAttendeesSql = `
+        INSERT INTO user_notification 
+            (username, notification_category, notification_info)
+        SELECT 
+            ea.username, 
+            6, 
+            CONCAT(
+                nc.notification_type, 
+                ' ', 
+                ei.event_name
+            )
+        FROM 
+            event_attendees ea
+            JOIN event_info ei ON ea.event_id = ei.event_id
+            JOIN notification_category nc ON nc.notification_id = 6
+        WHERE 
+            ea.event_id = ?;
+    `;
+
+    const notificationRequestsSql = `
+        INSERT INTO user_notification 
+            (username, notification_category, notification_info)
+        SELECT 
+            eru.username, 
+            6, 
+            CONCAT(
+                nc.notification_type, 
+                ' ', 
+                ei.event_name
+            )
+        FROM 
+            event_user_request eru
+            JOIN event_info ei ON eru.event_id = ei.event_id
+            JOIN notification_category nc ON nc.notification_id = 6
+        WHERE 
+            eru.event_id = ?;
+    `;
+
+    const deleteAttendeesSql = `DELETE FROM event_attendees WHERE event_id = ?;`;
+    const deleteRequestsSql = `DELETE FROM event_user_request WHERE event_id = ?;`;
+    const deleteEventSql = `DELETE FROM event_info WHERE event_id = ?;`;
+
+
+    db.query(notificationAttendeesSql, [eventId], (err, result) => {
         if (err) {
-            console.error('Error deleting attendees:', err);
+            console.error('Error inserting notification for attendees:', err);
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
 
-        // Perform deletion from event_user_request table
-        const deleteUserRequestsSql = `DELETE FROM event_user_request WHERE event_id = ?`;
-        db.query(deleteUserRequestsSql, eventId, (err, result) => {
+        db.query(notificationRequestsSql, [eventId], (err, result) => {
             if (err) {
-                console.error('Error deleting user requests:', err);
+                console.error('Error inserting notification for requests:', err);
                 res.status(500).json({ error: 'Internal Server Error' });
                 return;
             }
 
-            // Perform deletion from event_upvote table
-            const deleteUpvotesSql = `DELETE FROM event_upvote WHERE event_id = ?`;
-            db.query(deleteUpvotesSql, eventId, (err, result) => {
+            db.query(deleteAttendeesSql, [eventId], (err, result) => {
                 if (err) {
-                    console.error('Error deleting upvotes:', err);
+                    console.error('Error deleting attendees:', err);
                     res.status(500).json({ error: 'Internal Server Error' });
                     return;
                 }
 
-                // Perform deletion from event_user_review table
-                const deleteUserReviewsSql = `DELETE FROM event_user_review WHERE event_id = ?`;
-                db.query(deleteUserReviewsSql, eventId, (err, result) => {
+                db.query(deleteRequestsSql, [eventId], (err, result) => {
                     if (err) {
-                        console.error('Error deleting user reviews:', err);
+                        console.error('Error deleting requests:', err);
                         res.status(500).json({ error: 'Internal Server Error' });
                         return;
                     }
 
-                    // Perform deletion from event_info table
-                    const deleteEventSql = `DELETE FROM event_info WHERE event_id = ?`;
-                    db.query(deleteEventSql, eventId, (err, result) => {
+                    db.query(deleteEventSql, [eventId], (err, result) => {
                         if (err) {
-                            console.error('Error deleting event info:', err);
+                            console.error('Error deleting event:', err);
                             res.status(500).json({ error: 'Internal Server Error' });
                             return;
                         }
 
-                        // Send user notification
-                        const notificationSql = `INSERT INTO user_notification (username, notification_category, notification_info) SELECT DISTINCT username, 6, 'Event canceled' FROM event_user_request WHERE event_id = ?`;
-                        db.query(notificationSql, eventId, (err, result) => {
-                            if (err) {
-                                console.error('Error sending user notification:', err);
-                                res.status(500).json({ error: 'Internal Server Error' });
-                                return;
-                            }
-
-                            // If all deletions and notifications are successful, send success response
-                            res.json({ success: true });
-                        });
+                        // If everything is successful, send success response
+                        res.json({ success: true });
                     });
                 });
             });
@@ -1009,20 +1032,21 @@ app.post('/events/cancel/:eventId', (req, res) => {
     });
 });
 
-app.post('/delete-notification', (req, res) => {
-    const { id } = req.body; // Assuming you send the ID of the notification to delete in the request body
+// # For What?
+// app.post('/delete-notification', (req, res) => {
+//     const { id } = req.body; // Assuming you send the ID of the notification to delete in the request body
 
-    // Find the index of the notification with the given ID
-    const index = notifications.findIndex(notification => notification.id === id);
+//     // Find the index of the notification with the given ID
+//     const index = notifications.findIndex(notification => notification.id === id);
 
-    // If the notification is found, remove it from the array
-    if (index !== -1) {
-        notifications.splice(index, 1);
-        res.status(200).json({ message: 'Notification deleted successfully' });
-    } else {
-        res.status(404).json({ message: 'Notification not found' });
-    }
-});
+//     // If the notification is found, remove it from the array
+//     if (index !== -1) {
+//         notifications.splice(index, 1);
+//         res.status(200).json({ message: 'Notification deleted successfully' });
+//     } else {
+//         res.status(404).json({ message: 'Notification not found' });
+//     }
+// });
 
 
 app.post('/notifications/add', (req, res) => {

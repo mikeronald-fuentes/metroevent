@@ -1,29 +1,25 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 function CustomModal({ show, onHide, eventData }) {
 
-    const handleCancel = async () => {
-        try {
-            const response = await fetch(`http://localhost:3000/events/cancel/${eventData.event_id}`, {
-                method: 'POST',
-            });
-            if (!response.ok) {
-                throw new Error('Failed to cancel event');
-            }
-            const data = await response.json();
-            if (data.success) {
-                alert('Event canceled successfully');
-                onHide(); // Close the modal
-            } else {
-                throw new Error('Failed to cancel event');
-            }
-        } catch (error) {
-            console.error('Error canceling event:', error);
-            // Handle error
-        }
+    const handleCancel = () => {
+        console.log('Cancel Event button clicked');
+        axios.post(`http://localhost:3000/events/cancel`, {
+            eventId : eventData.event_id
+        })
+        .then(res =>{
+            toast.success('Event cancel successful');
+            onHide();
+        })
+        .catch(err => {
+            toast.error('Failed to cancel event');
+        })
     };
+    
     // Function to format date as Month-Month-Day-Year
     const formatDate = (dateString) => {
         const date = new Date(dateString);

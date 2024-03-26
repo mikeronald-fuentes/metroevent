@@ -413,7 +413,9 @@ const HomeUser = () => {
         <div className='userHomeScreen'>
             <div className='header'>
                 <div className='title'>Metro Events</div>
-                <div className="notification-container"></div>
+                <div className="notification-container">
+                    
+                </div>
                 <div className='logout'>
                     <Button color='inherit' onClick={handleLogout}>
                         <Typography>
@@ -687,6 +689,24 @@ const HomeUser = () => {
                     )}
                 </DialogContent>
             </Modal>
+        </div>
+        <div style={{width: '21%'}}>
+            <div className='notificationContainer'>
+                <div style={{marginTop: '10px', paddingLeft: '20px'}}><h2>Notifications</h2></div>
+                <div style={{overflowX: 'auto'}}>
+                {Array.isArray(notifications) && notifications.map((item, index)=> (
+                    <div className='notificationCard'>
+                        <div><h6>{item.notification}</h6></div>
+                        <div>Message: {item.text}</div>
+                    </div>
+                )) }
+                </div>
+                {notifications.length <= 0 &&
+                    <div style={{display: 'flex', justifyContent: 'center', alignContent: 'center', padding: 'auto'}}>
+                        <h6>No Notifications</h6>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 );
