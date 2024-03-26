@@ -383,6 +383,8 @@ const HomeUser = () => {
             </div> 
             <ToastContainer position="top-right" />
             <div className='btnBeOrganizer'>
+                <div style={{width: 'auto', marginRight: 'auto', color: 'black', paddingLeft: '50px'}}><h3>Welcome, <span style={{color: '#4c908a', fontWeight: '700'}}>{username} &#128513;</span></h3></div>
+
                 <Button variant="contained" className="btnOrganizer" onClick={() => handleUpgradeAccount(username, 0)}>
                     <Typography>Be an organizer</Typography>
                 </Button>
@@ -524,13 +526,14 @@ const HomeUser = () => {
                             <div className='location'><span>Location: </span> {item.event_location}</div>
                             <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
                             <div className='time' ><span>Time: </span>{handleTime(item.event_time)}</div>
-                            <br></br>
                         </div>
-                        <Typography>
-                            <Button variant='contained'>
-                                Review Event
-                            </Button>
-                        </Typography>
+                        <div style={{marginTop: '10px'}}>
+                            <Typography>
+                                <Button variant='contained'>
+                                    Review Event
+                                </Button>
+                            </Typography>
+                        </div>
                     </div>
                     ))}
                 </div>
