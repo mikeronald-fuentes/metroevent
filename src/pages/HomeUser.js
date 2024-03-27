@@ -128,7 +128,7 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
-            sendNotificationToOrganizer(event_name, orgusername);
+            sendNotificationToOrganizer(event_name, username, orgusername);
             fetchingData();
             if(data.message){
                 toast.success(data.message);
@@ -264,13 +264,13 @@ const HomeUser = () => {
     
 
     // send notifications of organizer
-    const sendNotificationToOrganizer = (event_name, username) => {
+    const sendNotificationToOrganizer = (event_name, username, orgusername) => {
         fetch('http://localhost:3000/sendnotificationuserregisterevent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({event_name, username})
+            body: JSON.stringify({event_name, username, orgusername})
         })
         .then(res => res.json())
         .then(data => {

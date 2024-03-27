@@ -711,7 +711,7 @@ app.post('/notifications', (req, res) => {
 });
 
 app.post('/sendnotificationuserregisterevent', (req, res) => {
-    const { event_name, username } = req.body;
+    const { event_name, username, orgusername } = req.body;
     const text = `User ${username} registered to your event named ${event_name}.`;
     let sql = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?, 8, ?)`;
 
@@ -724,6 +724,29 @@ app.post('/sendnotificationuserregisterevent', (req, res) => {
     });
 });
 
+app.get('/approveusers', (req, res) => {
+    const { eventid } = req.body;
+
+    let sql = 
+        `SELECT 
+            event_id,
+            username,
+            is_accepted
+        FROM 
+            event_user_request
+        WHERE 
+            event_id = ? AND is_accepted = 0`;
+    
+    db.query( sql,[eventid], (err, data) => {
+        if (err) {
+            console.error('Error executing query to fetch vote count:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.json(data);
+    });
+
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
