@@ -438,27 +438,28 @@ app.post('/users', (req, res) => {
 app.post('/joinevents', (req, res) => {
     const { username } = req.body;
 
-    let sql = `
-        SELECT 
-            ei.*, 
-            COUNT(eu.event_id) AS event_vote_count
-        FROM 
-            event_info ei 
-        LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id 
-        LEFT JOIN
-            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
-        WHERE 
-            eur.username IS NULL
-            AND ei.event_date >= CURDATE()  
-            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) 
-        GROUP BY 
-            ei.event_id
-        ORDER BY 
-            event_vote_count DESC
+    const sql = `
+    SELECT 
+        ei.*,
+        IFNULL(MAX(CASE WHEN eu.username = ? THEN 1 ELSE 0 END), 0) AS has_upvoted,
+        COUNT(eu.username) AS upvote_count
+    FROM 
+        event_info ei 
+    LEFT JOIN 
+        event_upvote eu ON ei.event_id = eu.event_id
+    LEFT JOIN
+        event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
+    WHERE 
+        (eur.username IS NULL)
+        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+    GROUP BY 
+        ei.event_id
+    ORDER BY 
+        upvote_count DESC, has_upvoted DESC;
     `;
 
-    db.query(sql, [username], (err, data) => {
+    db.query(sql, [username, username], (err, data) => {
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -466,74 +467,84 @@ app.post('/joinevents', (req, res) => {
         }
         res.json(data);
     });
+
 });
 
 // fetch user requested events
 app.post('/requestedevents', (req, res) => {
-    const { username } = req.body;
+     // Package data and result into an object before sending
+     const { username } = req.body;
 
-    let sql = `
-        SELECT 
-            ei.*, 
-            COUNT(eu.event_id) AS event_vote_count
-        FROM 
-            event_info ei 
-        LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id
-        LEFT JOIN
-            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
-        WHERE 
-            eur.username IS NOT NULL
-            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-        GROUP BY 
-            ei.event_id
-        ORDER BY 
-        event_vote_count DESC;
-    `;
+     const sql = `
+         SELECT 
+             ei.*,
+             IFNULL(MAX(CASE WHEN eu.username = ? THEN 1 ELSE 0 END), 0) AS has_upvoted,
+             COUNT(eu.username) AS upvote_count,
+             COUNT(eur.event_id) AS event_vote_count
+         FROM 
+             event_info ei 
+         LEFT JOIN 
+             event_upvote eu ON ei.event_id = eu.event_id
+         LEFT JOIN 
+             event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 0
+         WHERE 
+             (eur.username IS NOT NULL)
+             AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+             AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+         GROUP BY 
+             ei.event_id
+         ORDER BY 
+            upvote_count DESC, event_vote_count DESC;
 
-    db.query(sql, [username], (err, data) => {
-        if (err) {
-            console.error('Error executing query: ', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
-        }
-        res.json(data);
-    });
+     `;
+ 
+     db.query(sql, [username, username], (err, data) => {
+         if (err) {
+             console.error('Error executing query: ', err);
+             res.status(500).json({ error: 'Internal Server Error' });
+             return;
+         }
+         res.json(data);
+     });
+    
 });
+
 
 // fetch user registered events
 app.post('/registeredevents', (req, res) => {
     const { username } = req.body;
 
-    let sql = `
-        SELECT 
-            ei.*, 
-            COUNT(eu.event_id) AS event_vote_count
-        FROM 
-            event_info ei 
-        LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id
-        LEFT JOIN
-            event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
-        WHERE 
-            eur.username IS NOT NULL
-            AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-            AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
-        GROUP BY 
-            ei.event_id
-        ORDER BY 
-        event_vote_count DESC;
-    `;
+     const sql = `
+         SELECT 
+             ei.*,
+             IFNULL(MAX(CASE WHEN eu.username = ? THEN 1 ELSE 0 END), 0) AS has_upvoted,
+             COUNT(eu.username) AS upvote_count,
+             COUNT(eur.event_id) AS event_vote_count
+         FROM 
+             event_info ei 
+         LEFT JOIN 
+             event_upvote eu ON ei.event_id = eu.event_id
+         LEFT JOIN 
+             event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ? AND eur.is_accepted = 1
+         WHERE 
+             (eur.username IS NOT NULL)
+             AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+             AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+         GROUP BY 
+             ei.event_id
+         ORDER BY 
+            upvote_count DESC, event_vote_count DESC;
 
-    db.query(sql, [username], (err, data) => {
-        if (err) {
-            console.error('Error executing query: ', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
-        }
-        res.json(data);
-    });
+     `;
+ 
+     db.query(sql, [username, username], (err, data) => {
+         if (err) {
+             console.error('Error executing query: ', err);
+             res.status(500).json({ error: 'Internal Server Error' });
+             return;
+         }
+         res.json(data);
+     });
 });
 
 // fetch past events
@@ -577,7 +588,7 @@ app.post('/checkjoinupvote', (req, res) => {
         FROM 
             event_info ei 
         LEFT JOIN 
-            event_upvote eu ON ei.event_id = eu.event_id AND eu.username = ?
+            event_upvote eu ON ei.event_id = eu.event_id
         LEFT JOIN
             event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
         WHERE 
@@ -590,7 +601,7 @@ app.post('/checkjoinupvote', (req, res) => {
             event_vote_count DESC;
     `;
 
-    db.query(sql, [username, username], (err, data) => {
+    db.query(sql, [username], (err, data) => {
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -599,15 +610,15 @@ app.post('/checkjoinupvote', (req, res) => {
         
         const result = data.map(event => ({
             event_id: event.event_id,
-            has_upvoted: event.voted_by_user ? 1 : 0,
+            has_upvoted: event.voted_by_user === username ? 1 : 0, // Set has_upvoted to 1 if username matches voted_by_user
             upvote_count: event.upvote_count
         }));
 
         result.sort((a, b) => b.upvote_count - a.upvote_count);
-        const filteredResult = result.filter(event => event.has_upvoted === 0 || event.has_upvoted === 1);
-        res.json(filteredResult);
+        res.json(result);
     });
 });
+
 
 // fetch para sa requested events vote button style 
 app.post('/checkrequestedupvote', (req, res) => {

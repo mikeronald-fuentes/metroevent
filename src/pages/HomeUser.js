@@ -11,9 +11,6 @@ import ViewReview from './Components/CustomViewReviewModal';
 
 const HomeUser = () => {
     const [eventsDetails, setEventsDetails] = useState([]);
-    const [btnVote, setBtnVote] = useState([]);
-    const [btnVoteRequested, setBtnVoteRequested] = useState([]);
-    const [btnVoteRegistered, setBtnVoteRegistered] = useState([]);
     const [requestedEvents, setRequestedEvents] = useState([]);
     const [registeredEvents, setRegisteredEvents] = useState([]);
     const [pastevents, setPastEvents] = useState([]);
@@ -33,7 +30,6 @@ const HomeUser = () => {
             return;
         }
         fetchingData();
-        fetchingStyle(); 
         fetchNotifications(username);
         fetchReviewedEvents();
     }, [username, eventID]);
@@ -65,7 +61,7 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
-            setEventsDetails(data)
+            setEventsDetails(data);
         })
         .catch(err => console.error(err));
 
@@ -78,7 +74,7 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
-            setRequestedEvents(data)
+            setRequestedEvents(data);
         })
         .catch(err => console.error(err));
 
@@ -100,69 +96,6 @@ const HomeUser = () => {
             .then(data => setPastEvents(data))
             .catch(err => console.error(err));
     }
-
-    // re render button styles when register or vote button is clicked
-    const fetchingStyle = () => {
-        fetch('http://localhost:3000/checkjoinupvote', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const initialState = data.map(item => {
-                if (item.has_upvoted === 1) {
-                    return ['red', 'Upvoted'];
-                } else {
-                    return ['green', 'Upvote'];
-                }
-            });
-            setBtnVote(initialState);
-        })
-        .catch(err => console.error(err));
-
-        fetch('http://localhost:3000/checkregisteredupvote', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const initialState = data.map(item => {
-                if (item.has_upvoted === 1) {
-                    return ['red', 'Upvoted'];
-                } else {
-                    return ['green', 'Upvote'];
-                }
-            });
-            setBtnVoteRegistered(initialState);
-        })
-        .catch(err => console.error(err));
-
-        fetch('http://localhost:3000/checkrequestedupvote', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const initialState = data.map(item => {
-                if (item.has_upvoted === 1) {
-                    return ['red', 'Upvoted'];
-                } else {
-                    return ['green', 'Upvote'];
-                }
-            });
-            setBtnVoteRequested(initialState);
-        })
-        .catch(err => console.error(err));
-    };
 
     // upgrade account to be organizer or admin
     const handleUpgradeAccount = (username, type) => {
@@ -196,7 +129,6 @@ const HomeUser = () => {
         .then(res => res.json())
         .then(data => {
             fetchingData();
-            fetchingStyle();
             if(data.message){
                 toast.success(data.message);
             }else if(data.error){
@@ -208,7 +140,7 @@ const HomeUser = () => {
     
     // handle style for the vote buttons in registered events
     const handleUpVoteJoinEvents = (eventid, username, index) => {
-        if (btnVote[index]?.[0] === 'red') {
+        if (eventsDetails[index].has_upvoted === 1) {
             fetch(`http://localhost:3000/removeupvote`, {
                 method: 'POST',
                 headers: {
@@ -219,7 +151,6 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => {
                 fetchingData();
-                fetchingStyle();
                 if (data.message) {
                     toast.success(data.message);
                 } else if (data.error) {
@@ -238,50 +169,6 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => {
                 fetchingData();
-                fetchingStyle();
-                if (data.message) {
-                    toast.success(data.message);
-                } else if (data.error) {
-                    toast.error(data.error);
-                }
-            })
-            .catch(err => console.error(err));
-        }
-    };
-
-    // handle style for the vote buttons in registered events
-    const handleUpVoteRegistered = (eventid, username, index) => {
-        if (btnVoteRegistered[index]?.[0] === 'red') {
-            fetch(`http://localhost:3000/removeupvote`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ eventid, username })
-            })
-            .then(res => res.json())
-            .then(data => {
-                fetchingData();
-                fetchingStyle();
-                if (data.message) {
-                    toast.success(data.message);
-                } else if (data.error) {
-                    toast.error(data.error);
-                }
-            })
-            .catch(err => console.error(err));
-        } else {
-            fetch(`http://localhost:3000/addupvote`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ eventid , username})
-            })
-            .then(res => res.json())
-            .then(data => {
-                fetchingData();
-                fetchingStyle();
                 if (data.message) {
                     toast.success(data.message);
                 } else if (data.error) {
@@ -294,7 +181,7 @@ const HomeUser = () => {
 
     // handle style for the vote buttons in requested events
     const handleUpVoteRequested = (eventid, username, index) => {
-        if (btnVoteRequested[index]?.[0] === 'red') {
+        if (requestedEvents[index].has_upvoted === 1) {
             fetch(`http://localhost:3000/removeupvote`, {
                 method: 'POST',
                 headers: {
@@ -305,7 +192,6 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => {
                 fetchingData();
-                fetchingStyle();
                 if (data.message) {
                     toast.success(data.message);
                 } else if (data.error) {
@@ -324,7 +210,47 @@ const HomeUser = () => {
             .then(res => res.json())
             .then(data => {
                 fetchingData();
-                fetchingStyle();
+                if (data.message) {
+                    toast.success(data.message);
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    };
+
+    // handle style for the vote buttons in requested events
+    const handleUpVoteRegistered = (eventid, username, index) => {
+        if (registeredEvents[index].has_upvoted === 1) {
+            fetch(`http://localhost:3000/removeupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid, username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                fetchingData();
+                if (data.message) {
+                    toast.success(data.message);
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        } else {
+            fetch(`http://localhost:3000/addupvote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventid , username})
+            })
+            .then(res => res.json())
+            .then(data => {
+                fetchingData();
                 if (data.message) {
                     toast.success(data.message);
                 } else if (data.error) {
@@ -447,7 +373,7 @@ const HomeUser = () => {
                                         <div style={{width:'100%', display: 'flex'}}>
                                             <div className='eventName'>{item.event_name}</div>
                                             <div className='count'>
-                                                <span class="icon">&#x21e7;</span>{item.event_vote_count}
+                                                <span class="icon">&#x21e7;</span>{item.upvote_count}
                                             </div>
                                         </div>
                                         <div className='organizer'><i>by {item.event_organizer}</i></div>
@@ -474,12 +400,12 @@ const HomeUser = () => {
                                                 variant="contained" 
                                                 className="btnAdmin"
                                                 style={{
-                                                    backgroundColor: btnVote[index]?.[0] === 'red' ? 'red' : 'green',
+                                                    backgroundColor: item.has_upvoted === 1 ? 'red' : 'green',
                                                     color:'white'
                                                 }}
                                                 onClick={() => handleUpVoteJoinEvents(item.event_id, username, index)}
                                             >
-                                                <Typography>{btnVote[index]?.[1]}</Typography>
+                                                <Typography>{item.has_upvoted === 1 ? 'Upvoted' : 'Upvote'}</Typography>
                                             </Button>
                                         </div>
                                         <div style={{ marginRight: '10px', marginBottom: '7px', marginRight: 'auto'}}>
@@ -508,51 +434,41 @@ const HomeUser = () => {
                         </div>
                     </div>
                 )}
-                {registeredEvents.length > 0 && (
+                {requestedEvents.length > 0 && (
                     <div className='joinEvents'>
-                        <div className='txtUpcomming'>Registered Events</div>
+                        <div className='txtUpcomming'>Requested Events</div>
                         <div className='cards'>
-                            {Array.isArray(registeredEvents) && registeredEvents.map((item, index)=> (
+                            {Array.isArray(requestedEvents) && requestedEvents.map((item, index)=> (
                                 <div key={index} index={index} className='eventCards'>
                                     <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
                                         <div style={{width:'100%', display: 'flex'}}>
                                             <div className='eventName'>{item.event_name}</div>
-                                            <div className='count'><span class="icon">&#x21e7;</span>{item.event_vote_count}</div>
+                                            <div className='count'><span class="icon">&#x21e7;</span>{item.upvote_count}</div>
                                         </div>
                                         <div className='organizer'><i>by {item.event_organizer}</i></div>
-                                    <div className='description'><span>Description: </span> {item.event_description}</div>
-                                    <div className='type'><span>Type: </span> {item.event_type}</div>
-                                    <div className='limit'><span>People Limit: </span> {item.event_participants_limit}</div>
-                                    <div className='location'><span>Location: </span> {item.event_location}</div>
-                                    <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
-                                    <div className='time'><span>Time: </span>{handleTime(item.event_time)}</div>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: '100%', paddingTop: '7px' }}>
-                                    <div style={{ marginRight: 'auto', marginBottom: '7px', paddingRight: '10px' }}>
-                                        <Button 
-                                            variant="contained" 
-                                            className="btnAdmin" 
-                                            style={{ backgroundColor: 'blue' }} 
-                                            onClick={() => handleRegisterEvent(username, item.event_id)}
-                                        >
-                                            <Typography>Register</Typography>
-                                        </Button>
+                                        <div className='description'><span>Description: </span> {item.event_description}</div>
+                                        <div className='type'><span>Type: </span> {item.event_type}</div>
+                                        <div className='limit'><span>People Limit: </span> {item.event_participants_limit}</div>
+                                        <div className='location'><span>Location: </span> {item.event_location}</div>
+                                        <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
+                                        <div className='time' ><span>Time: </span>{handleTime(item.event_time)}</div>
                                     </div>
-                                    <div style={{ marginRight: '10px', marginBottom: '7px' }}>
-                                        <Button 
-                                            variant="contained" 
-                                            className="btnAdmin"
-                                            style={{
-                                                backgroundColor: btnVote[index]?.[0] === 'red' ? 'red' : 'green',
-                                                color:'white'
-                                            }}
-                                            onClick={() => handleUpVoteJoinEvents(item.event_id, username, index)}
-                                        >
-                                            <Typography>{btnVote[index]?.[1]}</Typography>
-                                        </Button>
+                                    <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: '7px', alignItems: 'center'}}>
+                                        <div style={{marginRight: 'auto'}}><Typography>Requested</Typography></div>
+                                        <div>
+                                            <Button variant="contained" 
+                                                className="btnAdmin"
+                                                style={{
+                                                    backgroundColor: item.has_upvoted === 1 ? 'red' : 'green',
+                                                    color: 'white'
+                                                }}
+                                                onClick={() => handleUpVoteRequested(item.event_id, username, index)}>
+                                                <Typography>{item.has_upvoted === 1 ? 'Upvoted' : 'UpVote'}</Typography>
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div style={{ marginRight: '10px', marginBottom: '7px', marginRight: 'auto'}}>
-                                        <Typography>
+                                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'row'}}>
+                                        <Typography style={{ marginRight: 'auto' }}>
                                             {eventReviews[item.event_id] ? (
                                                 <Button variant='contained' disabled>
                                                     Reviewed
@@ -563,8 +479,6 @@ const HomeUser = () => {
                                                 </Button>
                                             )}
                                         </Typography>
-                                    </div>
-                                    <div style={{ marginRight: '10px', marginBottom: '7px' }}>
                                         <Typography>
                                             <Button variant="contained" onClick={() => handleOpenReviewModal(item.event_id)}>
                                                 Reviews
@@ -572,67 +486,79 @@ const HomeUser = () => {
                                         </Typography>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
-            {requestedEvents.length > 0 && (
-                <div className='joinEvents'>
-                    <div className='txtUpcomming'>Requested Events</div>
-                    <div className='cards'>
-                        {Array.isArray(requestedEvents) && requestedEvents.map((item, index)=> (
-                            <div key={index} index={index} className='eventCards'>
-                                <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
-                                    <div style={{width:'100%', display: 'flex'}}>
-                                        <div className='eventName'>{item.event_name}</div>
-                                        <div className='count'><span class="icon">&#x21e7;</span>{item.event_vote_count}</div>
+                )}
+                {registeredEvents.length > 0 && (
+                        <div className='joinEvents'>
+                            <div className='txtUpcomming'>Registered Events</div>
+                            <div className='cards'>
+                                {Array.isArray(registeredEvents) && registeredEvents.map((item, index)=> (
+                                    <div key={index} index={index} className='eventCards'>
+                                        <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
+                                            <div style={{width:'100%', display: 'flex'}}>
+                                                <div className='eventName'>{item.event_name}</div>
+                                                <div className='count'><span class="icon">&#x21e7;</span>{item.upvote_count}</div>
+                                            </div>
+                                            <div className='organizer'><i>by {item.event_organizer}</i></div>
+                                        <div className='description'><span>Description: </span> {item.event_description}</div>
+                                        <div className='type'><span>Type: </span> {item.event_type}</div>
+                                        <div className='limit'><span>People Limit: </span> {item.event_participants_limit}</div>
+                                        <div className='location'><span>Location: </span> {item.event_location}</div>
+                                        <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
+                                        <div className='time'><span>Time: </span>{handleTime(item.event_time)}</div>
                                     </div>
-                                    <div className='organizer'><i>by {item.event_organizer}</i></div>
-                                    <div className='description'><span>Description: </span> {item.event_description}</div>
-                                    <div className='type'><span>Type: </span> {item.event_type}</div>
-                                    <div className='limit'><span>People Limit: </span> {item.event_participants_limit}</div>
-                                    <div className='location'><span>Location: </span> {item.event_location}</div>
-                                    <div className='date'><span>Date: </span> {handleDate(item.event_date)}</div>
-                                    <div className='time' ><span>Time: </span>{handleTime(item.event_time)}</div>
-                                </div>
-                                <div style={{display: 'flex', flexDirection: 'row', width: '100%', paddingTop: '7px', alignItems: 'center'}}>
-                                    <div style={{marginRight: 'auto'}}><Typography>Requested</Typography></div>
-                                    <div>
-                                        <Button variant="contained" 
-                                            className="btnAdmin"
-                                            style={{
-                                                backgroundColor: btnVoteRequested[index]?.[0] === 'red' ? 'red' : 'green',
-                                                color: 'white'
-                                            }}
-                                            onClick={() => handleUpVoteRequested(item.event_id, username, index)}>
-                                            <Typography>{btnVoteRequested[index]?.[1]}</Typography>
-                                        </Button>
+                                    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: '100%', paddingTop: '7px' }}>
+                                        <div style={{ marginRight: 'auto', marginBottom: '7px', paddingRight: '10px' }}>
+                                            <Button 
+                                                variant="contained" 
+                                                className="btnAdmin" 
+                                                style={{ backgroundColor: 'blue' }} 
+                                                onClick={() => handleRegisterEvent(username, item.event_id)}
+                                            >
+                                                <Typography>Register</Typography>
+                                            </Button>
+                                        </div>
+                                        <div style={{ marginRight: '10px', marginBottom: '7px' }}>
+                                            <Button 
+                                                variant="contained" 
+                                                className="btnAdmin"
+                                                style={{
+                                                    backgroundColor: item.has_upvoted === 1 ? 'red' : 'green',
+                                                    color:'white'
+                                                }}
+                                                onClick={() => handleUpVoteRegistered(item.event_id, username, index)}
+                                            >
+                                                <Typography>{item.has_upvoted === 1 ? 'Upvoted' : 'Upvote'}</Typography>
+                                            </Button>
+                                        </div>
+                                        <div style={{ marginRight: '10px', marginBottom: '7px', marginRight: 'auto'}}>
+                                            <Typography>
+                                                {eventReviews[item.event_id] ? (
+                                                    <Button variant='contained' disabled>
+                                                        Reviewed
+                                                    </Button>
+                                                ) : (
+                                                    <Button variant='contained' onClick={() => handleOpenModal(item.event_id)}>
+                                                        Review Event
+                                                    </Button>
+                                                )}
+                                            </Typography>
+                                        </div>
+                                        <div style={{ marginRight: '10px', marginBottom: '7px' }}>
+                                            <Typography>
+                                                <Button variant="contained" onClick={() => handleOpenReviewModal(item.event_id)}>
+                                                    Reviews
+                                                </Button>
+                                            </Typography>
+                                        </div>
                                     </div>
                                 </div>
-                                <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'row'}}>
-                                    <Typography style={{ marginRight: 'auto' }}>
-                                        {eventReviews[item.event_id] ? (
-                                            <Button variant='contained' disabled>
-                                                Reviewed
-                                            </Button>
-                                        ) : (
-                                            <Button variant='contained' onClick={() => handleOpenModal(item.event_id)}>
-                                                Review Event
-                                            </Button>
-                                        )}
-                                    </Typography>
-                                    <Typography>
-                                        <Button variant="contained" onClick={() => handleOpenReviewModal(item.event_id)}>
-                                            Reviews
-                                        </Button>
-                                    </Typography>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
             {pastevents.length > 0 && (
                 <div className='joinEvents'>
                     <div className='txtUpcomming'>Past Events</div>
