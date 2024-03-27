@@ -118,7 +118,7 @@ const HomeUser = () => {
     };
     
     // used when register button is clicked
-    const handleRegisterEvent = (username, eventid) => {
+    const handleRegisterEvent = (username, eventid, orgusername, event_name) => {
         fetch(`http://localhost:3000/registerevent`, {
             method: 'POST',
             headers: {
@@ -128,6 +128,7 @@ const HomeUser = () => {
         })
         .then(res => res.json())
         .then(data => {
+            sendNotificationToOrganizer(event_name, orgusername);
             fetchingData();
             if(data.message){
                 toast.success(data.message);
@@ -262,7 +263,21 @@ const HomeUser = () => {
     };
     
 
-    // fetch notifications of user
+    // send notifications of organizer
+    const sendNotificationToOrganizer = (event_name, username) => {
+        fetch('http://localhost:3000/sendnotificationuserregisterevent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({event_name, username})
+        })
+        .then(res => res.json())
+        .then(data => {
+        })
+        .catch(err => console.error(err));
+    };
+    
     const fetchNotifications = (username) => {
         fetch('http://localhost:3000/notifications', {
             method: 'POST',
@@ -277,7 +292,6 @@ const HomeUser = () => {
         })
         .catch(err => console.error(err));
     };
-    
     
     // format date
     const handleDate = (date) => {
@@ -390,7 +404,7 @@ const HomeUser = () => {
                                                 variant="contained" 
                                                 className="btnAdmin" 
                                                 style={{ backgroundColor: 'blue' }} 
-                                                onClick={() => handleRegisterEvent(username, item.event_id)}
+                                                onClick={() => handleRegisterEvent(username, item.event_id, item.event_organizer, item.event_name)}
                                             >
                                                 <Typography>Register</Typography>
                                             </Button>
@@ -621,7 +635,7 @@ const HomeUser = () => {
                 <div style={{marginTop: '10px', paddingLeft: '20px'}}><h2>Notifications</h2></div>
                 <div style={{overflowX: 'auto'}}>
                 {Array.isArray(notifications) && notifications.map((item, index)=> (
-                    <div className='notificationCard'>
+                    <div key={index} className='notificationCard'>
                         <div><h6>{item.notification}</h6></div>
                         <div>Message: {item.text}</div>
                     </div>

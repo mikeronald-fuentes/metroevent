@@ -65,22 +65,21 @@ export default function OrganizerHome() {
             console.error('Error fetching events:', error);
         }
     };
+    
 
-    const fetchNotifications = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/notifications', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: username }),
-            });
-            const data = await response.json();
+    const fetchNotifications = (username) => {
+        fetch('http://localhost:3000/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
             setNotifications(data);
-            console.log('hermi', data);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        }
+        })
+        .catch(err => console.error(err));
     };
     
     const createEvent = () => {
@@ -114,7 +113,7 @@ export default function OrganizerHome() {
 
     const handleNotificationClick = () => {
         setShowNotificationModal(true); // Show the notification modal
-        fetchNotifications(); // Fetch notifications when the button is clicked
+        fetchNotifications(username); // Fetch notifications when the button is clicked
     };
 
     const handleCloseNotificationModal = () => {

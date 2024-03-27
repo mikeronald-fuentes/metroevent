@@ -19,10 +19,11 @@ export default function CreateEvent() {
         time: ""
     });
     const [message, setMessage] = useState('');
-
+    
     // Function to handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        console.log(value);
         setEventDetails({ ...eventDetails, [name]: value });
     };
 
@@ -30,12 +31,30 @@ export default function CreateEvent() {
     const handleTimeChange = (e) => {
         const { name, value } = e.target;
         // Format time as HH:MM:SS
-        const formattedTime = value + ':00';
+        const formattedTime = value;
         setEventDetails({ ...eventDetails, [name]: formattedTime });
     };
+    const handleTime = (time) =>{
+        const timestamp = time;
+        const dateObject = new Date(timestamp);
+        
+        let hour = dateObject.getHours();
+        let minute = dateObject.getMinutes();
+        let period = hour >= 12 ? 'PM' : 'AM';
 
+        if (hour > 12) {
+            hour -= 12;
+        } else if (hour === 0) { 
+            hour = 12;
+        }
+
+        const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+        eventDetails['time'] = formattedTime;
+        
+    }
     // Function to handle event submission
     const handleSubmit = async () => {
+        // handleTime(eventDetails.time);
         try {
             const response = await axios.post('http://localhost:3000/addevent', eventDetails);
             console.log(eventDetails);
@@ -164,7 +183,7 @@ export default function CreateEvent() {
                                 placeholder="Time"
                                 name="time"
                                 value={eventDetails.time}
-                                onChange={handleInputChange}
+                                onChange={handleTimeChange}
                             />
                         </div>
                     </div>
