@@ -919,8 +919,6 @@ app.get('/events/hasRequested/:eventId', (req, res) => {
 });
 
 
-
-
 app.post('/events/cancelRegistration', (req, res) => {
     try {
         const { event_id, username } = req.body;
@@ -1047,7 +1045,6 @@ app.post('/events/cancel', (req, res) => {
 //         res.status(404).json({ message: 'Notification not found' });
 //     }
 // });
-
 
 app.post('/notifications/add', (req, res) => {
     const { username, notification_category, notification_info } = req.body;

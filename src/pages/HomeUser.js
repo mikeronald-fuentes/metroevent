@@ -2,7 +2,7 @@ import './homeUserStyles.css';
 import { useState, useEffect } from "react";
 import { Typography, Button, Modal, DialogContent } from "@mui/material";
 import UserProfile from './UserProfile';
-import { useAuth, username } from '../Hooks/Authorization'; 
+import { useAuth } from '../Hooks/Authorization'; 
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -367,23 +367,22 @@ const HomeUser = () => {
     };
 
     //format time
-    const handleTime = (time) =>{
-        const timestamp = time;
-        const dateObject = new Date(timestamp);
-        
-        let hour = dateObject.getHours();
-        let minute = dateObject.getMinutes();
+    const handleTime = (time) => {
+        const [hours, minutes] = time.split(':').map(Number);
+    
+        let hour = hours;
         let period = hour >= 12 ? 'PM' : 'AM';
-
+    
         if (hour > 12) {
             hour -= 12;
         } else if (hour === 0) { 
             hour = 12;
         }
-
-        const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+    
+        const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
         return formattedTime;
     }
+    
 
     // logout
     const handleLogout = () => {
