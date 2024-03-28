@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-function CustomModal({ show, onHide, eventData }) {
+function CustomModal({ show, onHide, eventData, onCancel }) {
 
     const handleCancel = () => {
         console.log('Cancel Event button clicked');
@@ -12,7 +12,8 @@ function CustomModal({ show, onHide, eventData }) {
             eventId : eventData.event_id
         })
         .then(res =>{
-            toast.success('Event cancel successful');
+            toast.success('Event canceled successfully'); // Show success toast message
+            onCancel();
             onHide();
         })
         .catch(err => {
@@ -56,14 +57,12 @@ function CustomModal({ show, onHide, eventData }) {
                         <p><strong>Location:</strong> {eventData.event_location}</p>
                         <p><strong>Date:</strong> {formatDate(eventData.event_date)}</p>
                         <p><strong>Time:</strong> {formatTime(eventData.event_time)}</p>
-                        {/* Render other event details */}
                     </div>
                 )}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onHide}>Close</Button>
                 <Button variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={handleCancel}>Cancel Event</Button>
-                {/* Add other footer buttons if needed */}
             </Modal.Footer>
         </Modal>
     );

@@ -234,39 +234,24 @@ app.post('/addevent', (req, res) => {
         date,
         time,
     } = req.body;
+    console.log(organizer, eventType, eventName, description, limit, location, date, time);
 
-    // Check if the organizer exists and is an organizer (user_type = 1)
-    const checkOrganizerSql = 'SELECT * FROM user_info WHERE username = ? AND user_type = 1';
-    db.query(checkOrganizerSql, [organizer], (checkErr, checkResult) => {
-        if (checkErr) {
-            console.error('Error checking organizer:', checkErr);
-            res.status(500).json({ error: 'Internal Server Error1' });
+    // Organizer exists and is an organizer, proceed with event insertion
+    const sql = `
+        INSERT INTO event_info 
+        (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.query(sql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
+        if (err) {
+            console.error('Error adding event:', err);
+            result.status(500).json({ error: 'Internal Server Error' });
             return;
         }
 
-        if (checkResult.length === 0) {
-            // Organizer doesn't exist or is not an organizer
-            console.error('Organizer does not exist or is not an organizer');
-            res.status(400).json({ error: 'Organizer does not exist or is not an organizer' });
-            return;
-        }
-
-        // Organizer exists and is an organizer, proceed with event insertion
-        const insertEventSql = `
-            INSERT INTO event_info 
-            (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-
-        db.query(insertEventSql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
-            if (err) {
-                console.error('Error adding event:', err);
-                res.status(500).json({ error: 'Internal Server Error' });
-                return;
-            }
-        });
+        res.status(200).json({ message: 'Event added successfully' });
     });
 });
-
 
 
 app.get('/events/:username', (req, res) => {
@@ -891,10 +876,6 @@ app.get('/events/hasRequested/:eventId', (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ff029458aca58317a2bf50e949859f85eb99d0bf
 app.post('/events/cancelRegistration', (req, res) => {
     try {
         const { event_id, username } = req.body;
@@ -1006,25 +987,6 @@ app.post('/events/cancel', (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-// # For What?
-// app.post('/delete-notification', (req, res) => {
-//     const { id } = req.body; // Assuming you send the ID of the notification to delete in the request body
-
-//     // Find the index of the notification with the given ID
-//     const index = notifications.findIndex(notification => notification.id === id);
-
-//     // If the notification is found, remove it from the array
-//     if (index !== -1) {
-//         notifications.splice(index, 1);
-//         res.status(200).json({ message: 'Notification deleted successfully' });
-//     } else {
-//         res.status(404).json({ message: 'Notification not found' });
-//     }
-// });
-
-=======
->>>>>>> ff029458aca58317a2bf50e949859f85eb99d0bf
 app.post('/notifications/add', (req, res) => {
     const { username, notification_category, notification_info } = req.body;
 

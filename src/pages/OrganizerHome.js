@@ -4,33 +4,34 @@ import { Typography, Button } from '@mui/material';
 import { Card, CardActions, CardContent } from '@mui/material';
 import './OrganizerHome.css';
 import { useNavigate } from 'react-router-dom';
-import CustomModal from './Components/CustomModal'; // Import CustomModal component
+import CustomModal from './Components/CustomModal';
 import CustomJoinModal from './Components/CustomJoinModal';
 import CustomUpModal from './Components/CustomUpModal';
 import { useAuth } from '../Hooks/Authorization';
 import UserProfile from './UserProfile';
 import CustomNotifModal from './Components/CustomNotifModal';
 import ApproveUsersModal from './Components/CustomApproveUsers';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export default function OrganizerHome() {
     const navigate = useNavigate();
-    const [myEvents, setMyEvents] = useState([]); // State for user's events
-    const [upcomingEvents, setUpcomingEvents] = useState([]); // State for upcoming events
-    const [joinEvents, setJoinEvents] = useState([]); // State for events user has joined
-    const [username, setUsername] = useState(''); // State to store logged-in username
-    const [showModal, setShowModal] = useState(false); // State to control modal visibility
-    const [selectedEvent, setSelectedEvent] = useState(null); // State to store selected event
-    const [isJoinEvent, setIsJoinEvent] = useState(false); // State to check if it's a join event
-    const [isUpcomingEvent, setIsUpcomingEvent] = useState(false); // State to check if it's an upcoming event
-    const [requests, setRequests] = useState([]);
+    const [myEvents, setMyEvents] = useState([]);
+    const [upcomingEvents, setUpcomingEvents] = useState([]);
+    const [joinEvents, setJoinEvents] = useState([]);
+    const [username, setUsername] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isJoinEvent, setIsJoinEvent] = useState(false);
+    const [isUpcomingEvent, setIsUpcomingEvent] = useState(false);
     const { user } = useAuth();
-    const [notifications, setNotifications] = useState([]); // State for notifications
-    const [showNotificationModal, setShowNotificationModal] = useState(false); // State to control notification modal visibility
+    const [notifications, setNotifications] = useState([]);
+    const [showNotificationModal, setShowNotificationModal] = useState(false);
     const [showApproveUsersModal, setShowApproveUsersModal] = useState(false);
     const [eventId, setEventId] = useState('');
+    const [cancelEvent, setCancelEvent] = useState(false);
 
     useEffect(() => {
-        // Fetch events when the component mounts or when the username changes
         if (user) {
             setUsername(UserProfile.getUsername());
         } else {
@@ -41,27 +42,22 @@ export default function OrganizerHome() {
     useEffect(() => {
         if (username) {
             fetchEvents();
-            console.log("Fetching notifications...");
         }
-    }, [username]);
+    }, [username, cancelEvent]);
     
     const fetchEvents = async () => {
         try {
-            // Fetch user's events
             const myEventsResponse = await fetch(`http://localhost:3000/events/${username}`);
             const myEventsData = await myEventsResponse.json();
             setMyEvents(myEventsData);
     
-            // Fetch upcoming events
             const upcomingEventsResponse = await fetch(`http://localhost:3000/events/attended/${username}`);
             const upcomingEventsData = await upcomingEventsResponse.json();
             setUpcomingEvents(upcomingEventsData);
     
-            // Fetch join events
             const joinEventsResponse = await fetch(`http://localhost:3000/events?username=${username}`);
             const joinEventsData = await joinEventsResponse.json();
             
-            // Filter out events organized by the current user (case-sensitive)
             const filteredJoinEvents = joinEventsData.filter(event => event.event_organizer.toLowerCase() !== username.toLowerCase());
             setJoinEvents(filteredJoinEvents);
         } catch (error) {
@@ -69,45 +65,26 @@ export default function OrganizerHome() {
         }
     };
     
-
-    const fetchNotifications = (username) => {
-        fetch('http://localhost:3000/notifications', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        })
-        .then(res => res.json())
-        .then(data => {
-            setNotifications(data);
-        })
-        .catch(err => console.error(err));
-    };
-
-    // const fetchusersreg = (eventid) => {
-    //     fetch('http://localhost:3000/approveusers', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ eventid })
-    //     })
-    //     .then(res => res.json())
-    //     .then(data => {
-    //         console.log(data);
-    //         setApproveUsers(data);
-    //     })
-    //     .catch(err => console.error(err));
-    // };
-
-    const createEvent = () => {
-        navigate('/createevent');
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-    };
+    const handleCancelEvent = async (eventId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/events/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ eventId })
+            });
+            if (response.ok) {
+                setCancelEvent(prevState => !prevState);
+                toast.success('Event canceled successfully');
+            } else {
+                toast.error('Failed to cancel event');
+            }
+        } catch (error) {
+            console.error('Failed to cancel event:', error);
+            toast.error('Failed to cancel event');
+        }
+    };    
 
     const handleCheckEvent = (event) => {
         setSelectedEvent(event);
@@ -136,15 +113,27 @@ export default function OrganizerHome() {
     };
 
     const handleNotificationClick = () => {
-        setShowNotificationModal(true); // Show the notification modal
-        fetchNotifications(username); // Fetch notifications when the button is clicked
+        setShowNotificationModal(true);
+        fetchNotifications(username);
     };
 
-    const handleCloseNotificationModal = () => {
-        setShowNotificationModal(false); // Hide the notification modal
+    const fetchNotifications = (username) => {
+        fetch('http://localhost:3000/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setNotifications(data);
+        })
+        .catch(err => console.error(err));
     };
-    const handleCloseApproveUsers = () => {
-        setShowApproveUsersModal(false); // Hide the notification modal
+
+    const createEvent = () => {
+        navigate('/createevent', { state: { username: username } });
     };
 
     return (
@@ -153,7 +142,6 @@ export default function OrganizerHome() {
             <div className="organizer-content">
                 <div className="organizer-button-container">
                     <Button className="notif" onClick={handleNotificationClick}>
-                        {/* Add notification icon and text */}
                         Notifications
                     </Button>
                     <Button variant="contained" className="organizer-create-event" onClick={createEvent}>
@@ -237,22 +225,26 @@ export default function OrganizerHome() {
             {showModal && (
                 <>
                     {isJoinEvent ? (
-                        <CustomJoinModal show={showModal} onHide={handleCloseModal} eventData={selectedEvent} username={username}/>
+                        <CustomJoinModal show={showModal} onHide={() => setShowModal(false)} eventData={selectedEvent} username={username}/>
                     ) : isUpcomingEvent ? (
-                        <CustomUpModal show={showModal} onHide={handleCloseModal} eventData={selectedEvent} username={username}/>
+                        <CustomUpModal show={showModal} onHide={() => setShowModal(false)} eventData={selectedEvent} username={username}/>
                     ) : (
-                        <CustomModal show={showModal} onHide={handleCloseModal} eventData={selectedEvent} username={username} />
+                        <CustomModal
+                            show={showModal}
+                            onHide={() => setShowModal(false)}
+                            eventData={selectedEvent}
+                            username={username}
+                            onCancel={handleCancelEvent}
+                        />
                     )}
                 </>
             )}
             {showNotificationModal && (
-                <CustomNotifModal show={showNotificationModal} onHide={handleCloseNotificationModal} notifications={notifications} username={username}/>
+                <CustomNotifModal show={showNotificationModal} onHide={() => setShowNotificationModal(false)} notifications={notifications} username={username}/>
             )}
             {showApproveUsersModal && (
-                <ApproveUsersModal show={showApproveUsersModal} onHide={handleCloseApproveUsers} eventid={eventId} username={username}/>
+                <ApproveUsersModal show={showApproveUsersModal} onHide={() => setShowApproveUsersModal(false)} eventid={eventId} username={username}/>
             )}
         </>
     );
-
-
-            };
+}

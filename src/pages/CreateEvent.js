@@ -1,15 +1,18 @@
 
 import React, { useState } from "react";
 import HeaderComponent from "./HeaderComponent";
-import { Typography, Button, TextField, Alert } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // Importing useNavigate hook
+import { Button, Alert } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom"; // Importing useNavigate hook
 import "./CreateEvent.css";
 import axios from "axios";
 
 export default function CreateEvent() {
-    const navigate = useNavigate(); // Getting the navigate function
+    const navigate = useNavigate();
+    const location = useLocation();
+    const username = location.state.username;
+
     const [eventDetails, setEventDetails] = useState({
-        organizer: "",
+        organizer: username,
         eventType: "",
         eventName: "",
         description: "",
@@ -19,7 +22,7 @@ export default function CreateEvent() {
         time: ""
     });
     const [message, setMessage] = useState('');
-    
+    setEventDetails['username'] = username;
     // Function to handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -35,11 +38,9 @@ export default function CreateEvent() {
         setEventDetails({ ...eventDetails, [name]: formattedTime });
     };
     const handleTime = (time) =>{
-        const timestamp = time;
-        const dateObject = new Date(timestamp);
-        
-        let hour = dateObject.getHours();
-        let minute = dateObject.getMinutes();
+        const [hours, minutes] = time.split(':').map(Number);
+
+        let hour = hours;
         let period = hour >= 12 ? 'PM' : 'AM';
 
         if (hour > 12) {
@@ -48,44 +49,38 @@ export default function CreateEvent() {
             hour = 12;
         }
 
-        const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
+        const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
         eventDetails['time'] = formattedTime;
-        
     }
+
     // Function to handle event submission
     const handleSubmit = async () => {
-        // handleTime(eventDetails.time);
         try {
+            console.log("Submitting event:", eventDetails);
             const response = await axios.post('http://localhost:3000/addevent', eventDetails);
-            console.log(eventDetails);
+            console.log("Server response:", response.data);
             if (response.data.message === 'Event added successfully') {
-                alert('Event added successfully');
-                // Redirect to a success page or any other route
+                console.log('Event added successfully');
+                alert("Event added successfully"); 
                 navigate('/organizer');
             } else {
+                window.alert("Failed to add event");
                 setMessage('Failed to add event');
             }
         } catch (error) {
             console.error('Error adding event:', error);
             if (error.response) {
-                // The request was made and the server responded inth a status code
-                // that falls out of the range of 2xx
                 console.error('Server responded with status code:', error.response.status);
                 console.error('Response data:', error.response.data);
             } else if (error.request) {
-                // The request was made but no response was received
                 console.error('No response received from server:', error.request);
             } else {
-                // Something happened in setting up the request that triggered an Error
                 console.error('Error setting up request:', error.message);
             }
-            // Display an appropriate error message to the user
             alert('Error adding event. Please try again later.');
         }
-    };
+    };    
     
-    
-
     // Function to navigate back to the previous page
     const handleCancel = () => {
         navigate(-1); // Navigating back
@@ -124,10 +119,11 @@ export default function CreateEvent() {
                             <h3>Organizer</h3>
                             <input
                                 className="input"
-                                placeholder="Organizer"
                                 name="organizer"
-                                value={eventDetails.organizer}
+                                placeholder={username}
+                                value={eventDetails.username}
                                 onChange={handleInputChange}
+                                disabled={true}
                             />
                         </div>
                         <div className="info-column">
@@ -195,7 +191,6 @@ export default function CreateEvent() {
                     >
                         Post Event
                     </Button>
-                    {/* Call handleCancel function when the "Cancel" button is clicked */}
                     <Button
                         sx={{ width: '450px', marginRight: '20px', color: 'black', backgroundColor: '#d3d3d3' }}
                         onClick={handleCancel}
