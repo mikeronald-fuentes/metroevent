@@ -10,6 +10,7 @@ import CustomUpModal from './Components/CustomUpModal';
 import { useAuth } from '../Hooks/Authorization';
 import UserProfile from './UserProfile';
 import CustomNotifModal from './Components/CustomNotifModal';
+import ApproveUsersModal from './Components/CustomApproveUsers';
 
 export default function OrganizerHome() {
     const navigate = useNavigate();
@@ -25,6 +26,8 @@ export default function OrganizerHome() {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]); // State for notifications
     const [showNotificationModal, setShowNotificationModal] = useState(false); // State to control notification modal visibility
+    const [showApproveUsersModal, setShowApproveUsersModal] = useState(false);
+    const [eventId, setEventId] = useState('');
 
     useEffect(() => {
         // Fetch events when the component mounts or when the username changes
@@ -65,24 +68,39 @@ export default function OrganizerHome() {
             console.error('Error fetching events:', error);
         }
     };
-
-    const fetchNotifications = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/notifications', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: username }),
-            });
-            const data = await response.json();
-            setNotifications(data);
-            console.log('hermi', data);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        }
-    };
     
+
+    const fetchNotifications = (username) => {
+        fetch('http://localhost:3000/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            setNotifications(data);
+        })
+        .catch(err => console.error(err));
+    };
+
+    // const fetchusersreg = (eventid) => {
+    //     fetch('http://localhost:3000/approveusers', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ eventid })
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => {
+    //         console.log(data);
+    //         setApproveUsers(data);
+    //     })
+    //     .catch(err => console.error(err));
+    // };
+
     const createEvent = () => {
         navigate('/createevent');
     };
@@ -112,13 +130,21 @@ export default function OrganizerHome() {
         setShowModal(true);
     };
 
+    const handleViewUserRegistrations = (eventid) => {
+        setShowApproveUsersModal(true);
+        setEventId(eventid);
+    };
+
     const handleNotificationClick = () => {
         setShowNotificationModal(true); // Show the notification modal
-        fetchNotifications(); // Fetch notifications when the button is clicked
+        fetchNotifications(username); // Fetch notifications when the button is clicked
     };
 
     const handleCloseNotificationModal = () => {
         setShowNotificationModal(false); // Hide the notification modal
+    };
+    const handleCloseApproveUsers = () => {
+        setShowApproveUsersModal(false); // Hide the notification modal
     };
 
     return (
@@ -150,6 +176,7 @@ export default function OrganizerHome() {
                                             </Typography>
                                         </CardContent>
                                         <CardActions className="organizer-card-actions">
+                                            <Button variant="contained" className="organizer-check" onClick={() => handleViewUserRegistrations(event.event_id)}>Registrations</Button>
                                             <Button variant="contained" className="organizer-check" onClick={() => handleCheckEvent(event)}>Check</Button>
                                         </CardActions>
                                     </Card>
@@ -221,7 +248,11 @@ export default function OrganizerHome() {
             {showNotificationModal && (
                 <CustomNotifModal show={showNotificationModal} onHide={handleCloseNotificationModal} notifications={notifications} username={username}/>
             )}
+            {showApproveUsersModal && (
+                <ApproveUsersModal show={showApproveUsersModal} onHide={handleCloseApproveUsers} eventid={eventId} username={username}/>
+            )}
         </>
     );
-}
 
+
+            };

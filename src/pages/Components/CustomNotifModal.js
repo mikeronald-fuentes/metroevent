@@ -13,7 +13,7 @@ function CustomNotifModal({ show, onHide, notifications, handleAccept, handleDec
                 {notifications.map((notification, index) => (
                     <Card key={index} style={{ marginBottom: '20px' }}>
                         <Card.Body>
-                            <Card.Title><strong>Notification:</strong> {notification.notification}</Card.Title>
+                            <Card.Title>{notification.notification}</Card.Title>
                             <Card.Text>{notification.text}</Card.Text>
                             {/* No console.log here */}
                             {notification.notification_id === 5 && (
