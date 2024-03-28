@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import logo from '../images/logo.png';
+import loginAni from '../images/login.gif'
 import { Typography, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "./LoginStyles.css";
@@ -54,6 +55,7 @@ function Login() {
     <div className="contained">
       <div className="blue">
         <img src={logo} alt="Logo" className="logo" />
+        
         <Typography variant="h4" className="tag">Log in to your account</Typography>
         <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
       </div>

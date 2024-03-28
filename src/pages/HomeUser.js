@@ -525,14 +525,7 @@ const HomeUser = () => {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: '100%', paddingTop: '7px' }}>
                                         <div style={{ marginRight: 'auto', marginBottom: '7px', paddingRight: '10px' }}>
-                                            <Button 
-                                                variant="contained" 
-                                                className="btnAdmin" 
-                                                style={{ backgroundColor: 'blue' }} 
-                                                onClick={() => handleRegisterEvent(username, item.event_id)}
-                                            >
-                                                <Typography>Register</Typography>
-                                            </Button>
+                                                <Typography>Registered</Typography>
                                         </div>
                                         <div style={{ marginRight: '10px', marginBottom: '7px' }}>
                                             <Button 
@@ -547,6 +540,8 @@ const HomeUser = () => {
                                                 <Typography>{item.has_upvoted === 1 ? 'Upvoted' : 'Upvote'}</Typography>
                                             </Button>
                                         </div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', width: '100%', paddingTop: '7px' }}>
                                         <div style={{ marginRight: '10px', marginBottom: '7px', marginRight: 'auto'}}>
                                             <Typography>
                                                 {eventReviews[item.event_id] ? (
@@ -568,7 +563,7 @@ const HomeUser = () => {
                                             </Typography>
                                         </div>
                                     </div>
-                                </div>
+                                    </div>
                             ))}
                         </div>
                     </div>
