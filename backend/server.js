@@ -240,7 +240,7 @@ app.post('/addevent', (req, res) => {
     db.query(checkOrganizerSql, [organizer], (checkErr, checkResult) => {
         if (checkErr) {
             console.error('Error checking organizer:', checkErr);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error1' });
             return;
         }
 
@@ -681,6 +681,7 @@ app.post('/registeraccount', (req, res) => {
     });
 });
 
+// fetch notifications for users
 app.post('/notifications', (req, res) => {
     const { username } = req.body;
 
@@ -705,11 +706,11 @@ app.post('/notifications', (req, res) => {
             notification: notification.notification_type, 
             text: notification.notification_info
         }));
-        
         res.json(result);
     });
 });
 
+// send notification to organizer when a user register on a event
 app.post('/sendnotificationuserregisterevent', (req, res) => {
     const { event_name, username, orgusername } = req.body;
     const text = `User ${username} registered to your event named ${event_name}.`;
@@ -724,6 +725,7 @@ app.post('/sendnotificationuserregisterevent', (req, res) => {
     });
 });
 
+// fetch users that registered on the event
 app.post('/approveusers', (req, res) => {
     const { eventid } = req.body;
 
@@ -747,6 +749,7 @@ app.post('/approveusers', (req, res) => {
     });
 });
 
+// approve users that registered on the event and send notif
 app.post('/updateAcceptedStatus', (req, res) => {
     const { eventid, username } = req.body;
 
@@ -762,7 +765,6 @@ app.post('/updateAcceptedStatus', (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        res.status(500).json({ message: `Accepted ${username} to the event.` });
     });
     const event_name_query = `Select event_name from event_info Where event_id = ?`
     db.query(event_name_query, [eventid], (err, result) => {
@@ -774,7 +776,7 @@ app.post('/updateAcceptedStatus', (req, res) => {
 
         const event_name = result[0].event_name;
         const text = `You have successfully registered to the event ${event_name}.`;
-        const notif = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?,5, ?)`;
+        const notif = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?,5,?)`;
         db.query(notif, [username, text], (err, result) => {
             if (err) {
                 console.error('Error updating accepted status:', err);
@@ -782,9 +784,11 @@ app.post('/updateAcceptedStatus', (req, res) => {
                 return;
             }
         });
+        res.status(500).json({ message: `Accepted ${username} to the event.` });
     });
 });
 
+// decline users that registered on the event and send notif
 app.post('/removeUserRequest', (req, res) => {
     const { eventid, username } = req.body;
 
@@ -798,7 +802,6 @@ app.post('/removeUserRequest', (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        res.status(500).json({ message: `Declined  ${username} to join the event.` });
     });
     const event_name_query = `Select event_name from event_info Where event_id = ?`
     db.query(event_name_query, [eventid], (err, result) => {
@@ -818,8 +821,10 @@ app.post('/removeUserRequest', (req, res) => {
                 return;
             }
         });
+        res.status(500).json({ message: `Declined  ${username} to join the event.` });
     });
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
@@ -848,9 +853,9 @@ app.post('/events/join', (req, res) => {
             const notificationQuery = 'INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?, ?, ?)';
             await db.promise().query(notificationQuery, [organizer, 1, `User ${username} has requested to join your event`]);
 
-            console.log('Notification sent to organizer');
+            res.status(500).json({ message: 'Notification sent to users.' });
         } catch (error) {
-            console.error('Error sending notification:', error);
+            res.status(500).json({ error: 'Error sending notification.' });
             // Log the error and continue, as the main functionality (joining event) has already been completed
         }
 
@@ -858,9 +863,6 @@ app.post('/events/join', (req, res) => {
         res.json({ message: 'Event join request sent successfully' });
     });
 });
-
-
-
 
 app.get('/events/hasRequested/:eventId', (req, res) => {
     const { eventId } = req.params;
@@ -888,9 +890,6 @@ app.get('/events/hasRequested/:eventId', (req, res) => {
         }
     });
 });
-
-
-
 
 app.post('/events/cancelRegistration', (req, res) => {
     try {
@@ -1002,23 +1001,6 @@ app.post('/events/cancel', (req, res) => {
         });
     });
 });
-
-// # For What?
-// app.post('/delete-notification', (req, res) => {
-//     const { id } = req.body; // Assuming you send the ID of the notification to delete in the request body
-
-//     // Find the index of the notification with the given ID
-//     const index = notifications.findIndex(notification => notification.id === id);
-
-//     // If the notification is found, remove it from the array
-//     if (index !== -1) {
-//         notifications.splice(index, 1);
-//         res.status(200).json({ message: 'Notification deleted successfully' });
-//     } else {
-//         res.status(404).json({ message: 'Notification not found' });
-//     }
-// });
-
 
 app.post('/notifications/add', (req, res) => {
     const { username, notification_category, notification_info } = req.body;
