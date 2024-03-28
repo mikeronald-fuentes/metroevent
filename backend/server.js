@@ -715,7 +715,7 @@ app.post('/sendnotificationuserregisterevent', (req, res) => {
     const text = `User ${username} registered to your event named ${event_name}.`;
     let sql = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?, 8, ?)`;
 
-    db.query(sql, [username, text], (err, data) => {
+    db.query(sql, [orgusername, text], (err, data) => {
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
