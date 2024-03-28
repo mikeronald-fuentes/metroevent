@@ -762,7 +762,7 @@ app.post('/updateAcceptedStatus', (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
-        res.status(500).json({ message: 'Accepted' + {username} +'to the event.' });
+        res.status(500).json({ message: `Accepted ${username} to the event.` });
     });
     const event_name_query = `Select event_name from event_info Where event_id = ?`
     db.query(event_name_query, [eventid], (err, result) => {
@@ -783,11 +783,43 @@ app.post('/updateAcceptedStatus', (req, res) => {
             }
         });
     });
-
-    
 });
 
+app.post('/removeUserRequest', (req, res) => {
+    const { eventid, username } = req.body;
 
+    let sql = `
+        DELETE FROM event_user_request where event_id = ? AND username = ?
+    `;
+    
+    db.query(sql, [eventid, username], (err, result) => {
+        if (err) {
+            console.error('Error updating accepted status:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        res.status(500).json({ message: `Declined  ${username} to join the event.` });
+    });
+    const event_name_query = `Select event_name from event_info Where event_id = ?`
+    db.query(event_name_query, [eventid], (err, result) => {
+        if (err) {
+            console.error('Error updating accepted status:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        const event_name = result[0].event_name;
+        const text = `The organizer declined your request to join the event ${event_name}.`;
+        const notif = `INSERT INTO user_notification (username, notification_category, notification_info) VALUES (?,4, ?)`;
+        db.query(notif, [username, text], (err, result) => {
+            if (err) {
+                console.error('Error updating accepted status:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+        });
+    });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

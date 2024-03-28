@@ -50,6 +50,27 @@ function ApproveUsersModal({ show, onHide, eventid, handleAccept, handleDecline 
         .catch(err => console.error(err));
     };
 
+    const declineUser = (eventid, username) => {
+        fetch('http://localhost:3000/removeUserRequest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ eventid, username })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // setNotifications(data);
+            fetchusersreg(eventid);
+            if (data.message) {
+                toast.success(data.message);
+            } else if (data.error) {
+                toast.error(data.error);
+            }
+        })
+        .catch(err => console.error(err));
+    };
+
     return (
         <Modal show={show} onHide={onHide} size="lg">
             <Modal.Header closeButton>
@@ -66,7 +87,7 @@ function ApproveUsersModal({ show, onHide, eventid, handleAccept, handleDecline 
                     
                         <div>
                             <Button variant="success" onClick={() => approveUser(users.event_id, users.username)}>Accept</Button>{' '}
-                            <Button variant="danger" onClick={() => handleDecline(users)}>Decline</Button>
+                            <Button variant="danger" onClick={() => declineUser(users.event_id, users.username)}>Decline</Button>
                         </div>
                     
                 </Card.Body>
