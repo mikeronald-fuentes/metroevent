@@ -26,8 +26,8 @@ export default function OrganizerHome() {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]); // State for notifications
     const [showNotificationModal, setShowNotificationModal] = useState(false); // State to control notification modal visibility
-    const [approveUsers, setApproveUsers] = useState([]);
     const [showApproveUsersModal, setShowApproveUsersModal] = useState(false);
+    const [eventId, setEventId] = useState('');
 
     useEffect(() => {
         // Fetch events when the component mounts or when the username changes
@@ -85,20 +85,21 @@ export default function OrganizerHome() {
         .catch(err => console.error(err));
     };
 
-    const fetchusersreg = (eventid) => {
-        fetch('http://localhost:3000/approveusers', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ eventid })
-        })
-        .then(res => res.json())
-        .then(data => {
-            setApproveUsers(data);
-        })
-        .catch(err => console.error(err));
-    };
+    // const fetchusersreg = (eventid) => {
+    //     fetch('http://localhost:3000/approveusers', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ eventid })
+    //     })
+    //     .then(res => res.json())
+    //     .then(data => {
+    //         console.log(data);
+    //         setApproveUsers(data);
+    //     })
+    //     .catch(err => console.error(err));
+    // };
 
     const createEvent = () => {
         navigate('/createevent');
@@ -130,10 +131,8 @@ export default function OrganizerHome() {
     };
 
     const handleViewUserRegistrations = (eventid) => {
-        fetchusersreg(eventid)
-        setSelectedEvent(approveUsers);
-        setShowModal(true);
-
+        setShowApproveUsersModal(true);
+        setEventId(eventid);
     };
 
     const handleNotificationClick = () => {
@@ -143,6 +142,9 @@ export default function OrganizerHome() {
 
     const handleCloseNotificationModal = () => {
         setShowNotificationModal(false); // Hide the notification modal
+    };
+    const handleCloseApproveUsers = () => {
+        setShowApproveUsersModal(false); // Hide the notification modal
     };
 
     return (
@@ -174,7 +176,7 @@ export default function OrganizerHome() {
                                             </Typography>
                                         </CardContent>
                                         <CardActions className="organizer-card-actions">
-                                            <Button variant="contained" className="organizer-check" onClick={() => handleViewUserRegistrations(event.event_id)}>View Registrations</Button>
+                                            <Button variant="contained" className="organizer-check" onClick={() => handleViewUserRegistrations(event.event_id)}>Registrations</Button>
                                             <Button variant="contained" className="organizer-check" onClick={() => handleCheckEvent(event)}>Check</Button>
                                         </CardActions>
                                     </Card>
@@ -247,7 +249,7 @@ export default function OrganizerHome() {
                 <CustomNotifModal show={showNotificationModal} onHide={handleCloseNotificationModal} notifications={notifications} username={username}/>
             )}
             {showApproveUsersModal && (
-                <ApproveUsersModal show={showApproveUsersModal} onHide={handleCloseNotificationModal} notifications={notifications} username={username}/>
+                <ApproveUsersModal show={showApproveUsersModal} onHide={handleCloseApproveUsers} eventid={eventId} username={username}/>
             )}
         </>
     );
