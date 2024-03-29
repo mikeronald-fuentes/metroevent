@@ -209,7 +209,7 @@ const OrganizerHome = () => {
     
     // handle style for the vote buttons in registered events
     const handleUpVoteJoinEvents = (eventid, username, index) => {
-        if (eventsDetails[index].has_upvoted === 1) {
+        if (joinEvents[index].has_upvoted === 1) {
             fetch(`http://localhost:3000/removeupvote`, {
                 method: 'POST',
                 headers: {
