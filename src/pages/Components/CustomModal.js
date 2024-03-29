@@ -9,7 +9,7 @@ function CustomModal({ show, onHide, eventData, onCancel }) {
     const handleCancel = () => {
         console.log('Cancel Event button clicked');
         axios.post(`http://localhost:3000/events/cancel`, {
-            eventId : eventData.event_id
+            eventId : eventData.event_id,
         })
         .then(res =>{
             toast.success('Event canceled successfully'); // Show success toast message
@@ -20,7 +20,7 @@ function CustomModal({ show, onHide, eventData, onCancel }) {
             toast.error('Failed to cancel event');
         })
     };
-    
+    console.log(eventData);
     // Function to format date as Month-Month-Day-Year
     const formatDate = (dateString) => {
         const date = new Date(dateString);

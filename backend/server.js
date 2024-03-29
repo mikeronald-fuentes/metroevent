@@ -943,7 +943,7 @@ app.post('/events/cancel', (req, res) => {
     const deleteAttendeesSql = `DELETE FROM event_attendees WHERE event_id = ?;`;
     const deleteRequestsSql = `DELETE FROM event_user_request WHERE event_id = ?;`;
     const deleteEventSql = `DELETE FROM event_info WHERE event_id = ?;`;
-
+    const delEventUpvoteSql = `DELETE FROM event_upvote WHERE event_id = ?;`;
 
     db.query(notificationAttendeesSql, [eventId], (err, result) => {
         if (err) {
@@ -980,8 +980,16 @@ app.post('/events/cancel', (req, res) => {
                             return;
                         }
 
-                        // If everything is successful, send success response
-                        res.json({ success: true });
+                        db.query(delEventUpvoteSql, [eventId], (err, result) => {
+                            if (err) {
+                                console.error('Error deleting event_upvote:', err);
+                                res.status(500).json({ error: 'Internal Server Error' });
+                                return;
+                            }
+
+                            // If everything is successful, send success response
+                            res.json({ success: true });
+                        });
                     });
                 });
             });

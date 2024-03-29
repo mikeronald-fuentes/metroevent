@@ -50,7 +50,7 @@ const OrganizerHome = () => {
         fetchingData();
         fetchNotifications(username);
         fetchReviewedEvents();
-    }, [username, eventID]);
+    }, [username, eventID, cancelEvent]);
 
     const fetchReviewedEvents = () => {
         // Fetch the list of reviewed events for the current user
