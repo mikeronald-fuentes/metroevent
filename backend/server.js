@@ -15,7 +15,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'metro_event'
+    database: 'metro_event_1'
 });
 
 db.connect((err) => {
