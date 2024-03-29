@@ -5,6 +5,8 @@ import { Button, Alert } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom"; // Importing useNavigate hook
 import "./CreateEvent.css";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function CreateEvent() {
     const navigate = useNavigate();
@@ -37,21 +39,6 @@ export default function CreateEvent() {
         const formattedTime = value;
         setEventDetails({ ...eventDetails, [name]: formattedTime });
     };
-    const handleTime = (time) =>{
-        const [hours, minutes] = time.split(':').map(Number);
-
-        let hour = hours;
-        let period = hour >= 12 ? 'PM' : 'AM';
-
-        if (hour > 12) {
-            hour -= 12;
-        } else if (hour === 0) { 
-            hour = 12;
-        }
-
-        const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
-        eventDetails['time'] = formattedTime;
-    }
 
     // Function to handle event submission
     const handleSubmit = async () => {
@@ -60,24 +47,25 @@ export default function CreateEvent() {
             const response = await axios.post('http://localhost:3000/addevent', eventDetails);
             console.log("Server response:", response.data);
             if (response.data.message === 'Event added successfully') {
-                console.log('Event added successfully');
-                alert("Event added successfully"); 
-                navigate('/organizer');
+                toast.success("Event added successfully"); 
+                setTimeout(() => {
+                    navigate('/organizer');
+                }, 2000);
             } else {
-                window.alert("Failed to add event");
+                toast.error("Failed to add event");
                 setMessage('Failed to add event');
             }
         } catch (error) {
             console.error('Error adding event:', error);
             if (error.response) {
-                console.error('Server responded with status code:', error.response.status);
+                toast.error(`Server responded with status code: ${error.response.status}`);
                 console.error('Response data:', error.response.data);
             } else if (error.request) {
-                console.error('No response received from server:', error.request);
+                toast.error(`No response received from server: ${error.request}`);
             } else {
-                console.error('Error setting up request:', error.message);
+                toast.error(`Error setting up request: ${error.message}`);
             }
-            alert('Error adding event. Please try again later.');
+            toast.error('Error adding event. Please try again later.');
         }
     };    
     
@@ -113,6 +101,7 @@ export default function CreateEvent() {
                         />
                     </div>
                 </div>
+                <ToastContainer position="top-right" />
                 <div className="information">
                     <div className="info-row">
                         <div className="info-column">

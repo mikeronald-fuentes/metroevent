@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import logo from '../images/logo.png';
-import loginAni from '../images/login.gif'
 import { Typography, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "./LoginStyles.css";
