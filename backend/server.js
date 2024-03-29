@@ -450,9 +450,8 @@ app.post('/joinevents', (req, res) => {
     LEFT JOIN
         event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
     WHERE 
-        (eur.username IS NULL) 
-        OR ei.username  != ?
-        AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
+        (eur.username IS NULL AND ei.event_organizer  != ?)
+        AND ei.event_date >= CURDATE()  
         AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME()))
     GROUP BY 
         ei.event_id
