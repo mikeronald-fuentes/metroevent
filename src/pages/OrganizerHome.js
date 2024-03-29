@@ -308,7 +308,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Review from './Components/CustomReviewModal';
 import ViewReview from './Components/CustomViewReviewModal';
-import HeaderComponent from './HeaderComponent';
 import ApproveUsersModal from './Components/CustomApproveUsers';
 import CustomModal from './Components/CustomModal';
 import CustomJoinModal from './Components/CustomJoinModal';
@@ -471,20 +470,6 @@ const OrganizerHome = () => {
         setSelectedEvent(event);
         setIsJoinEvent(false);
         setIsUpcomingEvent(false);
-        setShowModal(true);
-    };
-
-    const handleCheckJoinEvent = (event) => {
-        setSelectedEvent(event);
-        setIsJoinEvent(true);
-        setIsUpcomingEvent(false);
-        setShowModal(true);
-    };
-
-    const handleCheckUpcomingEvent = (event) => {
-        setSelectedEvent(event);
-        setIsJoinEvent(false);
-        setIsUpcomingEvent(true);
         setShowModal(true);
     };
 
@@ -788,6 +773,7 @@ const OrganizerHome = () => {
                     <div className='joinEvents'>
                         <div className='txtUpcomming'>Join Event</div>
                         <div className='cards'>
+                            {console.log(joinEvents)}
                             {Array.isArray(joinEvents) && joinEvents.map((item, index)=> (
                                 <div key={index} index={index} className='eventCards'>
                                     <div style={{marginBottom: 'auto', overflowY: 'auto'}}>
