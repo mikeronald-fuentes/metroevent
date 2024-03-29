@@ -223,37 +223,6 @@ app.post('/decline', (req, res) => {
     }
 });
 
-// app.post('/addevent', (req, res) => {
-//     const {
-//         organizer,
-//         eventType,
-//         eventName,
-//         description,
-//         limit,
-//         location,
-//         date,
-//         time,
-//     } = req.body;
-//     console.log(organizer, eventType, eventName, description, limit, location, date, time);
-
-//     // Organizer exists and is an organizer, proceed with event insertion
-//     const sql = `
-//         INSERT INTO event_info 
-//         (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
-//         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-
-//     db.query(sql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
-//         if (err) {
-//             console.error('Error adding event:', err);
-//             result.status(500).json({ error: 'Internal Server Error' });
-//             return;
-//         }
-        
-        
-//         res.status(200).json({ message: 'Event added successfully' });
-//     });
-// });
-
 app.post('/addevent', (req, res) => {
     const {
         organizer,
@@ -481,16 +450,17 @@ app.post('/joinevents', (req, res) => {
     LEFT JOIN
         event_user_request eur ON ei.event_id = eur.event_id AND eur.username = ?
     WHERE 
-        (eur.username IS NULL)
+        (eur.username IS NULL) 
+        OR ei.username  != ?
         AND ei.event_date >= CURDATE()  -- Ensures event date is not in the past
-        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME())) -- Ensures event time is not in the past
+        AND (ei.event_date > CURDATE() OR (ei.event_date = CURDATE() AND ei.event_time > CURTIME()))
     GROUP BY 
         ei.event_id
     ORDER BY 
         upvote_count DESC, has_upvoted DESC;
     `;
 
-    db.query(sql, [username, username], (err, data) => {
+    db.query(sql, [username, username, username], (err, data) => {
         if (err) {
             console.error('Error executing query: ', err);
             res.status(500).json({ error: 'Internal Server Error' });
@@ -908,32 +878,6 @@ app.post('/events/join', (req, res) => {
     });
 });
 
-app.get('/events/hasRequested/:eventId', (req, res) => {
-    const { eventId } = req.params;
-    const { username } = req.body;
-    let sql = `
-        SELECT *
-        FROM event_user_request
-        WHERE event_id = ? AND username = ?`;
-
-    // Execute the SQL query
-    db.query(sql, [eventId, username], (err, data) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
-        }
-
-        // Check if the user has already requested to join the event
-        if (data.length > 0) {
-            // If there's already a request, send a response indicating it
-            res.json({ hasRequested: true });
-        } else {
-            // If there's no request, send a response indicating it
-            res.json({ hasRequested: false });
-        }
-    });
-});
 
 app.post('/events/cancelRegistration', (req, res) => {
     try {

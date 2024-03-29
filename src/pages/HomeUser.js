@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Review from './Components/CustomReviewModal';
 import ViewReview from './Components/CustomViewReviewModal';
+import HeaderComponent from './HeaderComponent';
 
 const HomeUser = () => {
     const [eventsDetails, setEventsDetails] = useState([]);

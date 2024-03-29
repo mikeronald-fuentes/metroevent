@@ -38,6 +38,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         paddingRight: '20px',
+        flex: '1',
     },
     title: {
         margin: 0,
