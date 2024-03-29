@@ -6,6 +6,8 @@ import "./LoginStyles.css";
 import axios from "axios";
 import { useAuth } from '../Hooks/Authorization';
 import UserProfile from './UserProfile';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -18,10 +20,11 @@ function Login() {
     try {
       const response = await axios.post('http://localhost:3000/login', { username, password });
       if (response.data.success) {
-        setMessage('Login successful');
+        toast.success('Login successful');
         login(response.data);
         UserProfile.setUsername(username);
         UserProfile.setUserType(response.data.user_type);
+        setTimeout(() => {
         if (response.data.user_type === 0) {
           navigate('/homeuser');
         } else if (response.data.user_type === 1) {
@@ -29,12 +32,12 @@ function Login() {
         } else if (response.data.user_type === 2) {
           navigate('/admin');
         }
+      }, 2000);
       } else {
-        setMessage('Invalid username or password');
+        toast.error('Invalid username or password');
       }
     } catch (error) {
-      console.error('Error during login: ', error);
-      setMessage('Error during login');
+      toast.error('Invalid username or password');
     }
   };
 
@@ -52,9 +55,9 @@ function Login() {
 
   return (
     <div className="contained">
+            <ToastContainer position="top-right" />
       <div className="blue">
         <img src={logo} alt="Logo" className="logo" />
-        
         <Typography variant="h4" className="tag">Log in to your account</Typography>
         <Typography variant="body1" className="tag2">Enter your credentials to access your account</Typography>
       </div>

@@ -223,6 +223,37 @@ app.post('/decline', (req, res) => {
     }
 });
 
+// app.post('/addevent', (req, res) => {
+//     const {
+//         organizer,
+//         eventType,
+//         eventName,
+//         description,
+//         limit,
+//         location,
+//         date,
+//         time,
+//     } = req.body;
+//     console.log(organizer, eventType, eventName, description, limit, location, date, time);
+
+//     // Organizer exists and is an organizer, proceed with event insertion
+//     const sql = `
+//         INSERT INTO event_info 
+//         (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
+//         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+//     db.query(sql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
+//         if (err) {
+//             console.error('Error adding event:', err);
+//             result.status(500).json({ error: 'Internal Server Error' });
+//             return;
+//         }
+        
+        
+//         res.status(200).json({ message: 'Event added successfully' });
+//     });
+// });
+
 app.post('/addevent', (req, res) => {
     const {
         organizer,
@@ -234,25 +265,53 @@ app.post('/addevent', (req, res) => {
         date,
         time,
     } = req.body;
-    console.log(organizer, eventType, eventName, description, limit, location, date, time);
 
-    // Organizer exists and is an organizer, proceed with event insertion
-    const sql = `
+    // Insert the event into the event_info table
+    const insertEventQuery = `
         INSERT INTO event_info 
-        (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location,  event_date,  event_time) 
+        (event_organizer, event_type, event_name, event_description, event_participants_limit, event_location, event_date, event_time) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    db.query(sql, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
+    db.query(insertEventQuery, [organizer, eventType, eventName, description, limit, location, date, time], (err, result) => {
         if (err) {
             console.error('Error adding event:', err);
-            result.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
+
+        // Notify all users with user_type 0 about the event creation
+        const getUsersQuery = 'SELECT username FROM user_info WHERE user_type = 0';
+        db.query(getUsersQuery, (error, users) => {
+            if (error) {
+                console.error('Error fetching users:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+
+            // Insert notifications for each user
+            users.forEach(user => {
+                const username = user.username;
+                const notificationCategory = 7; // Assuming 1 represents the category for event creation notifications
+                const notificationInfo = `${organizer} has created an event: ${eventName}`; // Include event name in the notification
+
+                const insertNotificationQuery = `
+                    INSERT INTO user_notification (username, notification_category, notification_info)
+                    VALUES (?, ?, ?)
+                `;
+
+                db.query(insertNotificationQuery, [username, notificationCategory, notificationInfo], (error, result) => {
+                    if (error) {
+                        console.error(`Error inserting notification for user ${username}:`, error);
+                        return;
+                    }
+                    console.log(`Notification inserted for user ${username}`);
+                });
+            });
+        });
 
         res.status(200).json({ message: 'Event added successfully' });
     });
 });
-
 
 app.get('/events/:username', (req, res) => {
     const { username } = req.params;
